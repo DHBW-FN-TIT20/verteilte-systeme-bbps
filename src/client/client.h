@@ -10,12 +10,6 @@
 using namespace std;
 
 class Client {
-    private:
-        int port;
-        string serverAddress;
-        int serverPort;
-        thread messageThread;
-
     public:
         /**
          * @brief Construct a new Client object
@@ -35,21 +29,21 @@ class Client {
         
         /**
          * @brief Subscribes to a topic.
-         * 
+         * Sends a subscribe request to the server.
          * @param topicName The name of the topic to subscribe to.
          */
         void subscribeTopic(string topicName);
 
         /**
          * @brief Unsubscribes from a topic.
-         *
+         * Sends a unsubscribe request to the server.
          * @param topicName The name of the topic to unsubscribe from.
          */
         void unsubscribe(string topicName);
 
         /**
          * @brief Publishes a message to a topic.
-         *
+         * Sends a publish request to a specific topicName with an message
          * @param topicName The name of the topic to publish the message to.
          * @param message The message to publish.
          */
@@ -57,6 +51,13 @@ class Client {
 
         /**
          * @brief Lists all available topics.
+         * Anforderung: Fordert eine Liste der verfügbaren Topics an.
+         * Parameter: Keine
+         * Rückgabe: Liste der Verfügbaren Topics.
+                     Erfolg oder Misserfolg:
+                     Topics erfolgreich übermittelt
+                     Ungültige Parameter
+                     Weitere interne Fehler
          */
         void listTopic();
 
@@ -82,6 +83,12 @@ class Client {
          * @param timestamp The timestamp of the message.
          */
         void printMessage(string message, time_t timestamp);
+
+    private:
+        int port;
+        string serverAddress;
+        int serverPort;
+        thread messageThread;
 };
 
 #endif

@@ -1,5 +1,5 @@
-#ifndef CLIENT_H
-#define CLIENT_H
+#ifndef CLIENTCONNECTION_H
+#define CLIENTCONNECTION_H
 
 #include <string>
 #include <ctime>
@@ -11,21 +11,21 @@ class ClientConnection
     public:
         /**
          * @brief Construct a new Client Connection object
-         * Creates the Socket with the client
-         * @param address IP Address of the client
+         * Creates the Socket with the client.
+         * @param address IPv4 Address of the client
          * @param port Port of the client
          */
         ClientConnection(string address, int port);
         
         /**
          * @brief Destroy the Client Connection object
-         * Closes the socket
+         * Closes the socket.
          */
         ~ClientConnection();
 
         /**
          * @brief Sends a message to the client using the websocket
-         * the sent Status Code is always 0
+         * The sent status code is always 0 (successful).
          * @param message Message to send
          * @param timestamp Timestamp of the message
          */
@@ -35,6 +35,6 @@ class ClientConnection
         string address;
         int port;
         int socket;
-
 };
+
 #endif
