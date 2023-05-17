@@ -1,2 +1,2 @@
-# verteilte-systeme-bbs
-Abschlusstestat für die Vorlesung Verteilte Systeme von Brandenburger, Braun, Patzelt und Schuler
+# verteilte-systeme-bbpss
+Abschlusstestat für die Vorlesung Verteilte Systeme von Brandenburger, Braun, Patzelt, Schuler und Silberzahn
