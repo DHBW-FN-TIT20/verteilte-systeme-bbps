@@ -5,7 +5,7 @@ client.o: src/client/client.h src/client/client.cpp
 	g++ -c src/client/client.cpp -o client.o
 
 main_client.o: src/client/main.cpp
-	g++ -c src/client/main.cpp -o main_client.o
+	g++ -c src/client/main.cpp -o main_client.o -lspdlog
 
 client.exe: client.o main_client.o
 	g++ client.o main_client.o -o client.exe
