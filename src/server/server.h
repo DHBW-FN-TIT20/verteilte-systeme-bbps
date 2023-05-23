@@ -19,12 +19,12 @@ class Server {
          * @brief Construct a new Server object
          * 
          * @param topicTimeout Timeout in seconds.
-         * 
+         * @param port Port to listen on.
          * @details
          * Creates and starts the \p timeoutCheckerThread thread.
          * Logs the start of the server including the server address and port.
          */
-        Server(int topicTimeout);
+        Server(int port, int topicTimeout);
 
         /**
          * @brief Destroy the Server object

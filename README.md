@@ -1,7 +1,22 @@
 # verteilte-systeme-bbpss
 Abschlusstestat für die Vorlesung Verteilte Systeme von Brandenburger, Braun, Patzelt, Schuler und Silberzahn
 
-## Start the client
+# Instructions
+
+## Start the Server
+A server is started with the following arguments:
+```
+--port (optional)
+    Port to listen on
+    Default: 8080
+--topic-timeout (optional in Seconds) [default 30]
+    Inactivity Timeout in seconds for all topics. If there are no new mesages over this time each subscriber gets a wakeup message.
+    Default: 30
+```
+
+There is a `--help` command to display all available arguments in the terminal as well.
+
+## Start the Client
 To start the client, there are several arguments that can be passed.
 - Since the SETTING arguments have a default value, they are optional.
 - In order to be able to start the server you have to provide exactly **one** COMMAND.
