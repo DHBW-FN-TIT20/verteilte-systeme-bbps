@@ -1,6 +1,6 @@
-#include "client.h"
+#include <spdlog/spdlog.h>
 
-#include "../include/spdlog/spdlog.h"
+#include "client.h"
 
 using namespace std;
 

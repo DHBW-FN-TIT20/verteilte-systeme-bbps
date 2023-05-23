@@ -1,8 +1,8 @@
 #include <iostream>
 #include <sstream>
+#include <spdlog/spdlog.h>
 #include <list>
 
-#include "../include/spdlog/spdlog.h"
 #include "client.h"
 
 using namespace std;
