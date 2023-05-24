@@ -18,8 +18,11 @@ class Client {
          * @param serverAddress IPv4 Address of the server
          * @param serverPort Port number of the server
          * 
+         * @throws runtime_error if the port is already in use
+         * 
          * @details
          * Starts a new thread (\p messageThread) that is listening for incoming messages on the defined port.
+         * Since the connection to the server is connectionless (UDP), errors due to serverAddress or serverPort will occur when sending a message.
          */
         Client(int port, string serverAddress, int serverPort);
 
@@ -70,7 +73,7 @@ class Client {
          * Sends a list request to the server.
          * Receives and prints a list of all available topics.
          */
-        void listTopic();
+        void listTopics();
 
         /**
          * @brief Retrieves the status of a topic.
