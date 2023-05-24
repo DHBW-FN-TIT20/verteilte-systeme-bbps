@@ -166,6 +166,9 @@ int main(int argc, char** argv) {
         return 1;
     }
 
+    cout << "Press ENTER key to exit..." << endl;
+    cin.get();
+
     spdlog::info("Shutting down...");
     delete client;
 

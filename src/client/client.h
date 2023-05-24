@@ -4,6 +4,7 @@
 #include <string>
 #include <ctime>
 #include <thread>
+#include <netinet/in.h>
 
 #include "../shared/statuscode.h"
 
@@ -107,6 +108,12 @@ class Client {
         int port;
         string serverAddress;
         int serverPort;
+        int serverSocket;
+        struct sockaddr_in serverAddr;
+        int messageSocket;
+        struct sockaddr_in clientAddr;
+        // Atomic bool does not need a mutex
+        atomic<bool> messageThreadRunning;
         thread messageThread;
 };
 

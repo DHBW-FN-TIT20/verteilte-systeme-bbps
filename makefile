@@ -10,7 +10,7 @@ main_client.o: src/client/main.cpp
 	g++ -c src/client/main.cpp -o main_client.o $(INC)
 
 client.exe: client.o main_client.o
-	g++ client.o main_client.o -o client.exe
+	g++ client.o main_client.o -o client.exe -ljsoncpp
 	rm -f client.o main_client.o
 
 # server
