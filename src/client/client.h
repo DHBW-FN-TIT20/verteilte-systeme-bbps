@@ -5,6 +5,7 @@
 #include <ctime>
 #include <thread>
 #include <netinet/in.h>
+#include <jsoncpp/json/json.h>
 
 #include "../shared/statuscode.h"
 
@@ -115,6 +116,8 @@ class Client {
         // Atomic bool does not need a mutex
         atomic<bool> messageThreadRunning;
         thread messageThread;
+
+        Json::Value sendMessage(const Json::Value &data);
 };
 
 #endif
