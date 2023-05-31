@@ -100,10 +100,11 @@ class Client {
         /**
          * @brief Prints a message with a timestamp.
          *
+         * @param topic The topic of the message.
          * @param message The message to print.
          * @param timestamp The timestamp of the message.
          */
-        void printMessage(string message, time_t timestamp);
+        void printMessage(string topic, string message, time_t timestamp);
 
     private:
         int port;
@@ -118,6 +119,7 @@ class Client {
         thread messageThread;
 
         Json::Value sendMessage(const Json::Value &data);
+        void logResponse(const Json::Value &response);
 };
 
 #endif

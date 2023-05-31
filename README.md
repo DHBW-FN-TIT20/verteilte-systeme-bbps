@@ -32,3 +32,57 @@ COMMAND | --subscribe &lt;TOPIC1&gt; &lt;...&gt; &lt;TOPICn&gt; | subscribe to (
 COMMAND | --publish &lt;TOPIC&gt; &lt;MESSAGE&gt; | publish a message to a topic
 COMMAND | --list-topics | list all existing topics
 COMMAND | --get-topic-status &lt;TOPIC1&gt; &lt;...&gt; &lt;TOPICn&gt; | get the status of (multiple) topics
+
+
+# JSON communication
+## Client request
+```json
+{
+    "command": int (ENUM)
+    "arguments": {
+        "{{ ARGUMENT_NAME }}": string,
+    }
+}
+```
+
+command | {{ ARGUMENT_NAME }}
+--- | ---
+SUBSCRIBE | topicName
+UNSUBSCRIBE | topicName
+PUBLISH | topicName, message
+LIST_TOPICS | 
+GET_TOPIC_STATUS | topicName
+
+## Server response
+### Default
+```json
+{
+    "statusCode": int (ENUM)
+}
+```
+
+### LIST_TOPIC
+```json
+{
+    "statusCode": int (ENUM),
+    "topics": string[]
+}
+```
+
+### GET_TOPIC_STATUS
+```json
+{
+    "statusCode": int (ENUM),
+    "messageTimestamp": uint64_t,
+    "subscribers": string[]
+}
+```
+
+## Server publish
+```json
+{
+    "topic": string,
+    "messageTimestamp": uint64_t,
+    "message": string
+}
+```
