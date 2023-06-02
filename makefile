@@ -25,8 +25,14 @@ server.o: src/server/server.h src/server/server.cpp
 main_server.o: src/server/main.cpp
 	g++ -c src/server/main.cpp -o main_server.o $(INC)
 
-server.exe: server.o main_server.o command.o
-	g++ server.o main_server.o command.o -o server.exe -ljsoncpp
+topic.o: src/server/topic.h src/server/topic.cpp
+	g++ -c src/server/topic.cpp -o topic.o $(INC)
+
+clientconnection.o: src/server/clientconnection.h src/server/clientconnection.cpp
+	g++ -c src/server/clientconnection.cpp -o clientconnection.o $(INC)
+
+server.exe: server.o main_server.o  command.o
+	g++ server.o main_server.o topic.o clientconnection.o command.o -o server.exe -ljsoncpp
 	rm -f server.o main_server.o
 
 
