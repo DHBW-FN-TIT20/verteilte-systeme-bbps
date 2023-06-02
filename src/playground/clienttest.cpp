@@ -39,7 +39,14 @@ int main() {
     }
 
     std::string message = "Hello server!";
-    if (send(clientSocket, message.c_str(), message.length(), 0) < 0) {
+    std::string MultilineString =
+        "{"
+            "\"command\": 0,"
+            "\"arguments\": {"
+            "\"topicName\": \"TEST\""
+            "}"
+        "}";
+    if (send(clientSocket, MultilineString.c_str(), MultilineString.length(), 0) < 0) {
         std::cerr << "Error sending data to server" << std::endl;
         return -1;
     }
