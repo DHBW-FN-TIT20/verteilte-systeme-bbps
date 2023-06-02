@@ -39,7 +39,7 @@ server.exe: server.o main_server.o  command.o
 # general
 
 clean:
-	rm -f client.o server.o main_client.o main_server.o client.exe server.exe
+	rm -f client.o server.o main_client.o main_server.o clientconnection.o topic.o command.o client.exe server.exe
 
 all: client.exe server.exe
 
