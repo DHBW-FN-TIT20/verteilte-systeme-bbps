@@ -1,6 +1,10 @@
 # include paths
 INC = -I ./include
 
+# shared
+command.o: src/shared/command.h src/shared/command.cpp
+	g++ -c src/shared/command.cpp -o command.o $(INC)
+
 # client
 
 client.o: src/client/client.h src/client/client.cpp
@@ -9,9 +13,9 @@ client.o: src/client/client.h src/client/client.cpp
 main_client.o: src/client/main.cpp
 	g++ -c src/client/main.cpp -o main_client.o $(INC)
 
-client.exe: client.o main_client.o
-	g++ client.o main_client.o -o client.exe
-	rm -f client.o main_client.o
+client.exe: client.o main_client.o command.o
+	g++ client.o main_client.o command.o -o client.exe -ljsoncpp
+	rm -f client.o main_client.o command.o
 
 # server
 
@@ -21,8 +25,8 @@ server.o: src/server/server.h src/server/server.cpp
 main_server.o: src/server/main.cpp
 	g++ -c src/server/main.cpp -o main_server.o $(INC)
 
-server.exe: server.o main_server.o
-	g++ server.o main_server.o -o server.exe
+server.exe: server.o main_server.o command.o
+	g++ server.o main_server.o command.o -o server.exe -ljsoncpp
 	rm -f server.o main_server.o
 
 
