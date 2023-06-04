@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "commandIdentifiers.h"
+#include "communicationParameters.h"
 #include "statuscode.h"
 
 using namespace std;
@@ -45,7 +46,7 @@ class Response {
          * @return true if the argument was set successfully.
          * @return false if the argument does not exist or cannot be set.
          */
-        bool setResponseArgument(string argumentName, string argumentValue);
+        bool setResponseArgument(CommunicationParameters argumentName, string argumentValue);
 
         /**
          * @brief Set the Response Argument value to a vector of strings.
@@ -55,7 +56,7 @@ class Response {
          * @return true if the argument was set successfully.
          * @return false if the argument does not exist or cannot be set.
          */
-        bool setResponseArgument(string argumentName, vector<string> argumentValue);
+        bool setResponseArgument(CommunicationParameters argumentName, vector<string> argumentValue);
 
         /**
          * @brief Set the Response Argument value to a uint64_t.
@@ -65,7 +66,7 @@ class Response {
          * @return true if the argument was set successfully.
          * @return false if the argument does not exist or cannot be set.
          */
-        bool setResponseArgument(string argumentName, uint64_t argumentValue);
+        bool setResponseArgument(CommunicationParameters argumentName, uint64_t argumentValue);
 
         /**
          * @brief Get the Response Argument value as string.
@@ -74,14 +75,14 @@ class Response {
          * @param argumentName Name of the argument.
          * @return string Value of the argument.
          */
-        string getResponseArgument(string argumentName) const;
+        string getResponseArgument(CommunicationParameters argumentName) const;
 
         /**
          * @brief Get a list of the available argument names.
          * 
          * @return vector<string> List of available argument names.
          */
-        vector<string> getAvailableArguments() const;
+        vector<CommunicationParameters> getAvailableArguments() const;
 
         /**
          * @brief Set the response status code
@@ -117,7 +118,7 @@ class Response {
         static Response deserialize(CommandIdentifiers commandIdentifier, string serializedResponse);
     private:
         Statuscode statusCode;
-        vector<string> availableResponseArguments;
+        vector<CommunicationParameters> availableResponseArguments;
         vector<string> responseArguments;
 };
 
