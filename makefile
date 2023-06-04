@@ -15,7 +15,7 @@ main_client.o: src/client/main.cpp
 
 client.exe: client.o main_client.o command.o
 	g++ client.o main_client.o command.o -o client.exe -ljsoncpp
-	rm -f client.o main_client.o command.o
+	rm -f client.o main_client.o
 
 # server
 
