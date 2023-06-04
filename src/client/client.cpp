@@ -10,6 +10,8 @@
 #include <string>
 
 #include "client.h"
+#include "../shared/command.h"
+#include "../shared/commandIdentifiers.h"
 
 #define SERVER_RESPONSE_TIMEOUT 30
 #define BUFFER_SIZE 2048
@@ -99,6 +101,8 @@ Client::~Client() {
 void Client::subscribeTopic(string topicName) {
     spdlog::debug("--------------------");
     spdlog::debug("Subscribing to topic: {}", topicName);
+
+    Command subscribe(CommandIdentifiers::SUBSCRIBE);
 
     // TODO: Check correct syntax for json request
     Json::Value root;
