@@ -1,42 +1,46 @@
 /**
  * @file response.cpp
- * @brief 
+ * @brief
  * @version 0.1
  * @date 2023-06-04
- * 
+ *
  * @copyright Copyright (c) 2023
- * 
+ *
  */
 #include <jsoncpp/json/json.h>
 #include <spdlog/spdlog.h>
 
 #include "response.h"
+#include "communicationParameters.h"
 
-static map<CommandIdentifiers, vector<string>> responseDictionary = {
+static map<CommandIdentifiers, vector<CommunicationParameters>> responseDictionary = {
     {CommandIdentifiers::SUBSCRIBE, {}},
     {CommandIdentifiers::UNSUBSCRIBE, {}},
     {CommandIdentifiers::PUBLISH, {}},
-    {CommandIdentifiers::LIST_TOPICS, {"topics"}},
-    {CommandIdentifiers::GET_TOPIC_STATUS, {"messageTimestamp", "subscribers"}}
-};
+    {CommandIdentifiers::LIST_TOPICS, {CommunicationParameters::TOPICS}},
+    {CommandIdentifiers::GET_TOPIC_STATUS, {CommunicationParameters::MESSAGE_TIMESTAMP, CommunicationParameters::SUBSCRIBERS}}};
 
-Response::Response(CommandIdentifiers commandIdentifier) {
+Response::Response(CommandIdentifiers commandIdentifier)
+{
     // Get the argument names for the response
-    vector<string> responseArgumentNames = responseDictionary[commandIdentifier];
+    vector<CommunicationParameters> responseArgumentNames = responseDictionary[commandIdentifier];
 
     this->availableResponseArguments = responseArgumentNames;
 
     // Initialize the response argument values array with empty strings for easy access.
-    for (int i = 0; i < responseArgumentNames.size(); i++) {
+    for (int i = 0; i < responseArgumentNames.size(); i++)
+    {
         this->responseArguments.push_back("");
     }
 }
 
 Response::~Response() {}
 
-bool Response::setResponseArgument(string argumentName, string argumentValue) {
+bool Response::setResponseArgument(CommunicationParameters argumentName, string argumentValue)
+{
     // Check if the argument exists
-    if (find(this->availableResponseArguments.begin(), this->availableResponseArguments.end(), argumentName) == this->availableResponseArguments.end()) {
+    if (find(this->availableResponseArguments.begin(), this->availableResponseArguments.end(), argumentName) == this->availableResponseArguments.end())
+    {
         spdlog::error("Response argument does not exist: {}", argumentName);
         return false;
     }
@@ -50,12 +54,15 @@ bool Response::setResponseArgument(string argumentName, string argumentValue) {
     return true;
 }
 
-bool Response::setResponseArgument(string argumentName, vector<string> argumentValue) {
+bool Response::setResponseArgument(CommunicationParameters argumentName, vector<string> argumentValue)
+{
     // Convert the argumentValue vector to a string
     string argumentValueString = "[";
-    for (int i = 0; i < argumentValue.size(); i++) {
+    for (int i = 0; i < argumentValue.size(); i++)
+    {
         argumentValueString += argumentValue[i];
-        if (i != argumentValue.size() - 1) {
+        if (i != argumentValue.size() - 1)
+        {
             argumentValueString += ",";
         }
     }
@@ -64,13 +71,16 @@ bool Response::setResponseArgument(string argumentName, vector<string> argumentV
     return setResponseArgument(argumentName, argumentValueString);
 }
 
-bool Response::setResponseArgument(string argumentName, uint64_t argumentValue) {
+bool Response::setResponseArgument(CommunicationParameters argumentName, uint64_t argumentValue)
+{
     return setResponseArgument(argumentName, to_string(argumentValue));
 }
 
-string Response::getResponseArgument(string argumentName) const {
+string Response::getResponseArgument(CommunicationParameters argumentName) const
+{
     // Check if the argument exists
-    if (find(this->availableResponseArguments.begin(), this->availableResponseArguments.end(), argumentName) == this->availableResponseArguments.end()) {
+    if (find(this->availableResponseArguments.begin(), this->availableResponseArguments.end(), argumentName) == this->availableResponseArguments.end())
+    {
         spdlog::error("Response argument does not exist: {}", argumentName);
         throw logic_error("Response argument does not exist");
     }
@@ -82,26 +92,31 @@ string Response::getResponseArgument(string argumentName) const {
     return this->responseArguments[argumentIndex];
 }
 
-vector<string> Response::getAvailableArguments() const {
+vector<CommunicationParameters> Response::getAvailableArguments() const
+{
     return this->availableResponseArguments;
 }
 
-bool Response::setStatusCode(Statuscode statusCode) {
+bool Response::setStatusCode(Statuscode statusCode)
+{
     this->statusCode = statusCode;
     return true;
 }
 
-Statuscode Response::getStatusCode() const {
+Statuscode Response::getStatusCode() const
+{
     return this->statusCode;
 }
 
-string Response::serialize() const {
+string Response::serialize() const
+{
     Json::Value root;
     // statusCode as int
     root["statusCode"] = static_cast<int>(this->statusCode);
 
-    for (int i = 0; i < this->availableResponseArguments.size(); i++) {
-        root[this->availableResponseArguments[i]] = this->responseArguments[i];
+    for (int i = 0; i < this->availableResponseArguments.size(); i++)
+    {
+        root[communicationParameterToStringDictionary[this->availableResponseArguments[i]]] = this->responseArguments[i];
     }
 
     Json::StreamWriterBuilder builder;
@@ -110,16 +125,18 @@ string Response::serialize() const {
     return Json::writeString(builder, root);
 }
 
-Response Response::deserialize(CommandIdentifiers commandIdentifier, string serializedResponse) {
+Response Response::deserialize(CommandIdentifiers commandIdentifier, string serializedResponse)
+{
     Json::Value root;
     Json::CharReaderBuilder builder;
-    Json::CharReader* reader = builder.newCharReader();
+    Json::CharReader *reader = builder.newCharReader();
     string errors;
 
     bool parsingSuccessful = reader->parse(serializedResponse.c_str(), serializedResponse.c_str() + serializedResponse.size(), &root, &errors);
     delete reader;
 
-    if (!parsingSuccessful) {
+    if (!parsingSuccessful)
+    {
         spdlog::error("Failed to parse JSON: {}", errors);
         throw logic_error("Failed to parse JSON");
     }
@@ -130,8 +147,9 @@ Response Response::deserialize(CommandIdentifiers commandIdentifier, string seri
     response.setStatusCode(static_cast<Statuscode>(root["statusCode"].asInt()));
 
     // Set the response arguments
-    for (int i = 0; i < response.availableResponseArguments.size(); i++) {
-        response.setResponseArgument(response.availableResponseArguments[i], root[response.availableResponseArguments[i]].asString());
+    for (int i = 0; i < response.availableResponseArguments.size(); i++)
+    {
+        response.setResponseArgument(response.availableResponseArguments[i], root[communicationParameterToStringDictionary[response.availableResponseArguments[i]]].asString());
     }
 
     return response;

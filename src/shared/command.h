@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "commandIdentifiers.h"
+#include "communicationParameters.h"
 
 using namespace std;
 
@@ -43,7 +44,7 @@ class Command {
          * @return true if the argument was set successfully.
          * @return false if the argument does not exist or cannot be set.
          */
-        bool setCommandArgument(string argumentName, string argumentValue);
+        bool setCommandArgument(CommunicationParameters argumentName, string argumentValue);
 
         /**
          * @brief Get the Command Argument value.
@@ -51,7 +52,7 @@ class Command {
          * @param argumentName The name of the argument.
          * @return string The value of the argument.
          */
-        string getCommandArgument(string argumentName) const;
+        string getCommandArgument(CommunicationParameters argumentName) const;
 
         /**
          * @brief Checks whether all required arguments are set.
@@ -84,7 +85,7 @@ class Command {
         /**
          * @brief Specifies the available command argument names.
          */
-        vector<string> availableCommandArguments;
+        vector<CommunicationParameters> availableCommandArguments;
 
         /**
          * @brief Specifies the command arguments.
