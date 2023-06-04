@@ -1,9 +1,8 @@
 /**
  * @file command.h
- * @author Lukas Braun, Henry Schuler
  * @brief Defines a class that represents a command that can be sent from the client to the server.
  * @version 0.2
- * @date 2023-06-02
+ * @date 2023-06-04
  * 
  * @copyright Copyright (c) 2023
  * 

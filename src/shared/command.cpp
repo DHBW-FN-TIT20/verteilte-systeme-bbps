@@ -1,9 +1,8 @@
 /**
  * @file commands.cpp
- * @author Henry Schuler
  * @brief Implements a class that represents a command that can be sent from the client to the server.
  * @version 0.1
- * @date 2023-06-02
+ * @date 2023-06-04
  *
  * @copyright Copyright (c) 2023
  *
@@ -18,7 +17,7 @@
  * This is used to construct a command object with the correct number of arguments.
  */
 static map<CommandIdentifiers, vector<string>> commandDictionary = {
-    {CommandIdentifiers::SUBSCRIBE, {"topicName"}},
+    {CommandIdentifiers::SUBSCRIBE, {"topicName", "clientPort"}},
     {CommandIdentifiers::UNSUBSCRIBE, {"topicName"}},
     {CommandIdentifiers::PUBLISH, {"topicName", "message"}},
     {CommandIdentifiers::LIST_TOPICS, {}},
@@ -101,6 +100,7 @@ string Command::serialize() const {
 
     // stringify JSON object
     Json::StreamWriterBuilder builder;
+    builder["indentation"] = "";
 
     return Json::writeString(builder, root);
 }
