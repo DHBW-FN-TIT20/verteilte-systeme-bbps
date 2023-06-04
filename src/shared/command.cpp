@@ -60,7 +60,7 @@ string Command::getCommandArgument(CommunicationParameters argumentName) const {
     // Check if the argument exists
     if (find(this->availableCommandArguments.begin(), this->availableCommandArguments.end(), argumentName) == this->availableCommandArguments.end()) {
         spdlog::error("Command argument does not exist: {}", argumentName);
-        throw logic_error("Command argument does not exist");
+        throw runtime_error("Command argument does not exist");
     }
 
     // Get the index of the argument
@@ -86,7 +86,7 @@ string Command::serialize() const {
     // Check if all arguments are set
     if (!this->isValid()) {
         spdlog::error("Not all arguments are set");
-        throw logic_error("Not all arguments are set");
+        throw runtime_error("Not all arguments are set");
     }
 
     Json::Value root;
@@ -117,12 +117,12 @@ Command Command::deserialize(string serializedCommand) {
 
     if (!is_parsed) {
         spdlog::error("Failed to parse JSON command: {}", errors);
-        throw logic_error("Failed to parse JSON command");
+        throw runtime_error("Failed to parse JSON command");
     }
 
     if (!root.isMember("command") || !root.isMember("arguments")) {
         spdlog::error("Command does not have all required values");
-        throw logic_error("Command does not have all required values");
+        throw runtime_error("Command does not have all required values");
     }
 
     // Get the command identifier
@@ -139,14 +139,14 @@ Command Command::deserialize(string serializedCommand) {
     for (int i = 0; i < keys.size(); i++) {
         if (!command.setCommandArgument(stringToCommunicationParameterDictionary[keys[i]], arguments[keys[i]].asString())) {
             spdlog::error("Failed to set command argument: {}", keys[i]);
-            throw logic_error("Failed to set command argument");
+            throw runtime_error("Failed to set command argument");
         }
     }
 
     // Check if the command is valid
     if (!command.isValid()) {
         spdlog::error("Command is not valid, there are missing arguments.");
-        throw logic_error("Command is not valid, there are missing arguments.");
+        throw runtime_error("Command is not valid, there are missing arguments.");
     }
 
     return command;

@@ -7,7 +7,10 @@
 #include <netinet/in.h>
 #include <jsoncpp/json/json.h>
 
+#include "../shared/command.h"
 #include "../shared/statuscode.h"
+#include "../shared/response.h"
+#include "../shared/message.h"
 
 using namespace std;
 
@@ -98,13 +101,11 @@ class Client {
         void handleMessages();
         
         /**
-         * @brief Prints a message with a timestamp.
+         * @brief Prints a message to a topic with a timestamp.
          *
-         * @param topic The topic of the message.
-         * @param message The message to print.
-         * @param timestamp The timestamp of the message.
+         * @param message The message object containing all informations.
          */
-        void printMessage(string topic, string message, time_t timestamp);
+        void printMessage(Message message);
 
     private:
         int port;
@@ -118,8 +119,8 @@ class Client {
         atomic<bool> messageThreadRunning;
         thread messageThread;
 
-        Json::Value sendMessage(const Json::Value &data);
-        void logResponse(const Json::Value &response);
+        void sendMessage(Command &command);
+        void logResponse(const Response &response, const string &senderIp, const string &senderPort);
 };
 
 #endif

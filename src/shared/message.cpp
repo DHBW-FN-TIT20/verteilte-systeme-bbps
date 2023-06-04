@@ -55,12 +55,20 @@ Message Message::deserialize(string serializedMessage) {
 
     if (!parsingSuccessful) {
         spdlog::error("Failed to parse message JSON: {}", errors);
-        throw logic_error("Failed to parse message JSON");
+        throw runtime_error("Failed to parse message JSON");
     }
 
-    string topic = messageJson["topic"].asString();
-    time_t messageTimestamp = static_cast<time_t>(stoll(messageJson["messageTimestamp"].asString()));
-    string message = messageJson["message"].asString();
+    string topic, message;
+    time_t messageTimestamp;
+
+    try {
+        topic = messageJson["topic"].asString();
+        messageTimestamp = static_cast<time_t>(stoll(messageJson["messageTimestamp"].asString()));
+        message = messageJson["message"].asString();
+    } catch (const invalid_argument &e) {
+        spdlog::error("Invalid or missing arguments in message JSON: {}", e.what());
+        throw runtime_error("Invalid or missing arguments in message JSON");
+    }
 
     return Message(topic, messageTimestamp, message);
 }

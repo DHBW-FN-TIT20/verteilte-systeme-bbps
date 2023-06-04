@@ -20,8 +20,7 @@ static map<CommandIdentifiers, vector<CommunicationParameters>> responseDictiona
     {CommandIdentifiers::LIST_TOPICS, {CommunicationParameters::TOPICS}},
     {CommandIdentifiers::GET_TOPIC_STATUS, {CommunicationParameters::MESSAGE_TIMESTAMP, CommunicationParameters::SUBSCRIBERS}}};
 
-Response::Response(CommandIdentifiers commandIdentifier)
-{
+Response::Response(CommandIdentifiers commandIdentifier) {
     // Get the argument names for the response
     vector<CommunicationParameters> responseArgumentNames = responseDictionary[commandIdentifier];
 
@@ -41,7 +40,7 @@ bool Response::setResponseArgument(CommunicationParameters argumentName, string 
     // Check if the argument exists
     if (find(this->availableResponseArguments.begin(), this->availableResponseArguments.end(), argumentName) == this->availableResponseArguments.end())
     {
-        spdlog::error("Response argument does not exist: {}", argumentName);
+        spdlog::error("Response argument does not exist: {}", communicationParameterToStringDictionary[argumentName]);
         return false;
     }
 
@@ -81,8 +80,8 @@ string Response::getResponseArgument(CommunicationParameters argumentName) const
     // Check if the argument exists
     if (find(this->availableResponseArguments.begin(), this->availableResponseArguments.end(), argumentName) == this->availableResponseArguments.end())
     {
-        spdlog::error("Response argument does not exist: {}", argumentName);
-        throw logic_error("Response argument does not exist");
+        spdlog::error("Response argument does not exist: {}", communicationParameterToStringDictionary[argumentName]);
+        throw runtime_error("Response argument does not exist");
     }
 
     // Get the index of the argument
@@ -138,18 +137,23 @@ Response Response::deserialize(CommandIdentifiers commandIdentifier, string seri
     if (!parsingSuccessful)
     {
         spdlog::error("Failed to parse JSON: {}", errors);
-        throw logic_error("Failed to parse JSON");
+        throw runtime_error("Failed to parse JSON");
     }
 
     Response response(commandIdentifier);
 
-    // Set the status code
-    response.setStatusCode(static_cast<Statuscode>(root["statusCode"].asInt()));
+    try {
+        // Set the status code
+        response.setStatusCode(static_cast<Statuscode>(root["statusCode"].asInt()));
 
-    // Set the response arguments
-    for (int i = 0; i < response.availableResponseArguments.size(); i++)
-    {
-        response.setResponseArgument(response.availableResponseArguments[i], root[communicationParameterToStringDictionary[response.availableResponseArguments[i]]].asString());
+        // Set the response arguments
+        for (int i = 0; i < response.availableResponseArguments.size(); i++)
+        {
+            response.setResponseArgument(response.availableResponseArguments[i], root[communicationParameterToStringDictionary[response.availableResponseArguments[i]]].asString());
+        }
+    } catch (const invalid_argument &e) {
+        spdlog::error("Invalid or missing arguments: {}", e.what());
+        throw runtime_error("Invalid or missing arguments.");
     }
 
     return response;

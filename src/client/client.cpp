@@ -11,7 +11,12 @@
 
 #include "client.h"
 #include "../shared/command.h"
+#include "../shared/response.h"
+#include "../shared/message.h"
+#include "../shared/statuscode.h"
 #include "../shared/commandIdentifiers.h"
+#include "../shared/communicationParameters.h"
+#include "../shared/arrayStringToVectorString.h"
 
 #define SERVER_RESPONSE_TIMEOUT 30
 #define BUFFER_SIZE 2048
@@ -80,6 +85,8 @@ Client::Client(int port, string serverAddress, int serverPort) {
         socklen_t addr_size = sizeof(addr);
         getsockname(messageSocket, (struct sockaddr *) &addr, &addr_size);
         spdlog::info("Successfully bound message socket to {}:{}.", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
+        // Set the port to the actually used port
+        this->port = ntohs(addr.sin_port);
     }
 
     // starting the message thread
@@ -104,20 +111,10 @@ void Client::subscribeTopic(string topicName) {
 
     Command subscribe(CommandIdentifiers::SUBSCRIBE);
 
-    // TODO: Check correct syntax for json request
-    Json::Value root;
-    root["command"] = "subscribe";
+    subscribe.setCommandArgument(CommunicationParameters::TOPIC_NAME, topicName);
+    subscribe.setCommandArgument(CommunicationParameters::CLIENT_PORT, to_string(this->port));
 
-    Json::Value arguments(Json::arrayValue);
-    arguments.append(topicName);
-    root["arguments"] = arguments;
-
-    Json::Value response = sendMessage(root);
-
-    logResponse(response);
-
-    // TODO: Check correct syntax for json response
-    // TODO: Do sth. with response (according to requirements)
+    sendMessage(subscribe);
     
     spdlog::debug("--------------------");
 }
@@ -126,18 +123,11 @@ void Client::unsubscribe(string topicName) {
     spdlog::debug("--------------------");
     spdlog::debug("Unsubscribing from topic: {}", topicName);
 
-    // TODO: Check correct syntax for json request
-    Json::Value root;
-    root["command"] = "unsubscribe";
+    Command unsubscribe(CommandIdentifiers::UNSUBSCRIBE);
 
-    Json::Value arguments(Json::arrayValue);
-    arguments.append(topicName);
-    root["arguments"] = arguments;
+    unsubscribe.setCommandArgument(CommunicationParameters::TOPIC_NAME, topicName);
 
-    Json::Value response = sendMessage(root);
-
-    // TODO: Check correct syntax for json response
-    // TODO: Do sth. with response (according to requirements)
+    sendMessage(unsubscribe);
 
     spdlog::debug("--------------------");
 }
@@ -146,19 +136,12 @@ void Client::publishTopic(string topicName, string message) {
     spdlog::debug("--------------------");
     spdlog::debug("Publishing message: {} to topic: {}", message, topicName);
 
-    // TODO: Check correct syntax for json request
-    Json::Value root;
-    root["command"] = "publish";
+    Command publish = Command(CommandIdentifiers::PUBLISH);
 
-    Json::Value arguments(Json::arrayValue);
-    arguments.append(topicName);
-    arguments.append(message);
-    root["arguments"] = arguments;
+    publish.setCommandArgument(CommunicationParameters::TOPIC_NAME, topicName);
+    publish.setCommandArgument(CommunicationParameters::MESSAGE, message);
 
-    Json::Value response = sendMessage(root);
-
-    // TODO: Check correct syntax for json response
-    // TODO: Do sth. with response (according to requirements)
+    sendMessage(publish);
 
     spdlog::debug("--------------------");
 }
@@ -167,17 +150,9 @@ void Client::listTopics() {
     spdlog::debug("--------------------");
     spdlog::debug("Listing topics...");
 
-    // TODO: Check correct syntax for json request
-    Json::Value root;
-    root["command"] = "listTopics";
+    Command listTopics = Command(CommandIdentifiers::LIST_TOPICS);
 
-    Json::Value arguments(Json::arrayValue);
-    root["arguments"] = arguments;
-
-    Json::Value response = sendMessage(root);
-
-    // TODO: Check correct syntax for json response
-    // TODO: Do sth. with response (according to requirements)
+    sendMessage(listTopics);
 
     spdlog::debug("--------------------");
 }
@@ -186,18 +161,11 @@ void Client::getTopicStatus(string topicName) {
     spdlog::debug("--------------------");
     spdlog::debug("Getting status of topic: {}", topicName);
 
-    // TODO: Check correct syntax for json request
-    Json::Value root;
-    root["command"] = "getTopicStatus";
+    Command getTopicStatus = Command(CommandIdentifiers::GET_TOPIC_STATUS);
 
-    Json::Value arguments(Json::arrayValue);
-    arguments.append(topicName);
-    root["arguments"] = arguments;
+    getTopicStatus.setCommandArgument(CommunicationParameters::TOPIC_NAME, topicName);
 
-    Json::Value response = sendMessage(root);
-
-    // TODO: Check correct syntax for json response
-    // TODO: Do sth. with response (according to requirements)
+    sendMessage(getTopicStatus);
     
     spdlog::debug("--------------------");
 }
@@ -217,28 +185,12 @@ void Client::handleMessages() {
         } else {
             spdlog::info("Received message from {}:{}", inet_ntoa(incomingAddr.sin_addr), ntohs(incomingAddr.sin_port));
 
-            Json::CharReaderBuilder builder {};
-            auto reader = unique_ptr<Json::CharReader>(builder.newCharReader());
-
-            Json::Value root {};
-            string errors {};
-            const auto is_parsed = reader->parse( clientMessage, clientMessage + 2000, &root, &errors );
-
-            if (!is_parsed) {
-                spdlog::error("Message parsing failed with error: {}", errors);
-            } else {
-                Json::StreamWriterBuilder writer;
-                spdlog::debug("Message received: \n{}", Json::writeString(writer, root));
-
-                if (root.isMember("topic") && root.isMember("messageTimestamp") && root.isMember("message")) {
-                    string topic = root["topic"].asString();
-                    string message = root["message"].asString();
-                    time_t timestamp = static_cast<time_t>(stoll(root["messageTimestamp"].asString()));
-
-                    printMessage(topic, message, timestamp);
-                } else {
-                    spdlog::error("Message does not contain all required fields.");
-                }
+            try {
+                Message message = Message::deserialize(clientMessage);
+                printMessage(message);
+            } catch (const runtime_error &e) {
+                spdlog::error("{}", e.what());
+                continue;
             }
         }
     }
@@ -246,93 +198,129 @@ void Client::handleMessages() {
     spdlog::debug("Message thread terminated.");
 }
 
-void Client::printMessage(string topic, string message, time_t timestamp) {
+void Client::printMessage(Message message) {
     char formattedTimestamp[21];
+    const time_t timestamp = message.getMessageTimestamp();
     strftime(formattedTimestamp, sizeof(formattedTimestamp), "%d.%m.%Y %H:%M::%S", localtime(&timestamp));
 
-    spdlog::info("\nTopic: {}\nTimestamp: {}\nMessage: {}", topic, formattedTimestamp, message);
+    spdlog::info("Message received:\nTopic: {}\nTimestamp: {}\nMessage: {}", message.getTopic(), formattedTimestamp, message.getMessage());
 }
 
-Json::Value Client::sendMessage(const Json::Value &data) {
-    // convert json to sendable char array
-    Json::StreamWriterBuilder writer;
-    writer["indentation"] = "";
-    string message = Json::writeString(writer, data);
+void Client::sendMessage(Command &command) {
+    string message = command.serialize();
 
     // send message to server
-    spdlog::debug("Sending message: {}", message);
+    spdlog::info("Sending message: {}", message);
     // TODO: Check if the complete message is sent
     sendto(serverSocket, (const char *)message.c_str(), strlen(message.c_str()), MSG_CONFIRM, (const struct sockaddr *)&serverAddr, sizeof(serverAddr));
 
     // prepare response buffer
-    char response[2000];
-    strncpy(response, "", sizeof(response));
+    char responseJson[BUFFER_SIZE];
+    strncpy(responseJson, "", sizeof(responseJson));
     struct sockaddr_in incomingAddr;
     socklen_t incomingAddrLen = sizeof(incomingAddr);
-    Json::Value responseJson {};
 
-    // receive response from server
-    if (recvfrom(serverSocket, response, sizeof(response), 0, (struct sockaddr*)&incomingAddr, &incomingAddrLen) < 0) {
+    // receive responseJson from server
+    if (recvfrom(serverSocket, responseJson, sizeof(responseJson), 0, (struct sockaddr*)&incomingAddr, &incomingAddrLen) < 0) {
         spdlog::error("No response from the server within 30 seconds.");
     } else {
-        spdlog::debug("Received message from {}:{}", inet_ntoa(incomingAddr.sin_addr), ntohs(incomingAddr.sin_port));
+        spdlog::info("Received message from {}:{}", inet_ntoa(incomingAddr.sin_addr), ntohs(incomingAddr.sin_port));
 
         // parse response
-        Json::CharReaderBuilder builder {};
-        auto reader = unique_ptr<Json::CharReader>(builder.newCharReader());
-
-        string errors {};
-        const auto is_parsed = reader->parse( response, response + sizeof(response), &responseJson, &errors );
-
-        if (!is_parsed) {
-            spdlog::error("Message parsing failed with error: {}", errors);
-        } else {
-            Json::StreamWriterBuilder writer;
-            spdlog::debug("Message received: \n{}", Json::writeString(writer, responseJson));
-
-            // append sender ip and port to response
-            responseJson["senderIp"] = inet_ntoa(incomingAddr.sin_addr);
-            responseJson["senderPort"] = ntohs(incomingAddr.sin_port);
+        try {
+            Response response = Response::deserialize(command.commandIdentifier, responseJson);
+            spdlog::debug("Response deserialized");
+            logResponse(response, inet_ntoa(incomingAddr.sin_addr), to_string(ntohs(incomingAddr.sin_port)));
+        } catch (const runtime_error &e) {
+            spdlog::error("Response cannot be parsed: {}", e.what());
         }
     }
-
-    return responseJson;
 }
 
-void Client::logResponse(const Json::Value &response) {
+void Client::logResponse(const Response &response, const string &senderIp, const string &senderPort) {
     // Sender: <ip>:<port> - Status: <status> - 
     //  - Topics: <topic1>, <topic2>, <topic3>
     //  - Message Timestamp: <timestamp>, Subscribers: <subscriber1>, <subscriber2>, <subscriber3>
 
-    string logString = "";
-    
-    if (response.isMember("senderIp") && response.isMember("senderPort")) {
-        logString += "Sender: " + response["senderIp"].asString() + ":" + response["senderPort"].asString() + " - ";
-    }
-    if (response.isMember("statusCode")) {
-        // TODO: Replace status code with text
-        logString += "Status: " + response["statusCode"].asString() + " - ";
-    }
-    if (response.isMember("topics")) {
-        logString += "Topics: ";
-        for (auto topic : response["topics"]) {
-            logString += topic.asString() + ", ";
-        }
-        logString += " - ";
-    }
-    if (response.isMember("messageTimestamp")) {
-        time_t timestamp = static_cast<time_t>(stoll(response["messageTimestamp"].asString()));
-        char formattedTimestamp[21];
-        strftime(formattedTimestamp, sizeof(formattedTimestamp), "%d.%m.%Y %H:%M::%S", localtime(&timestamp));
+    spdlog::debug("Logging response...");
 
-        logString += "Message Timestamp: " + string(formattedTimestamp) +" - ";
+    string logString = "";
+    // Sender Info
+    logString += "Sender: " + senderIp + ":" + senderPort + "\n";
+
+    // Status
+    logString += "Status: ";
+    
+    switch (response.getStatusCode()) {
+        case Statuscode::success:
+            logString += "Success";
+            break;
+
+        case Statuscode::failed:
+            logString += "Failed";
+            break;
+
+        case Statuscode::invalidParameter:
+            logString += "Invalid Parameter";
+            break;
+
+        case Statuscode::internalError:
+            logString += "Internal Error";
+            break;
+
+        default:
+            logString += "Unknown status code: " + to_string(static_cast<int>(response.getStatusCode()));
+            break;
     }
-    if (response.isMember("subscribers")) {
-        logString += "Subscribers: ";
-        for (auto subscriber : response["subscribers"]) {
-            logString += subscriber.asString() + ", ";
+
+    logString += "\n";
+
+    // Response Arguments
+    vector<CommunicationParameters> parameters = response.getAvailableArguments();
+
+    for (CommunicationParameters parameter : parameters) {
+        switch (parameter) {
+        case CommunicationParameters::TOPICS:
+            {
+                vector<string> topics = arrayStringToVectorString(response.getResponseArgument(parameter));
+                logString += "Topics: ";
+                for (string topic : topics) {
+                    logString += topic;
+                    if (topic != topics.back()) {
+                        logString += ", ";
+                    }
+                }
+                logString += "\n";
+                break;
+            }
+        case CommunicationParameters::MESSAGE_TIMESTAMP:
+            {
+                time_t timestamp = static_cast<time_t>(stoll(response.getResponseArgument(parameter)));
+                char formattedTimestamp[21];
+                strftime(formattedTimestamp, sizeof(formattedTimestamp), "%d.%m.%Y %H:%M::%S", localtime(&timestamp));
+
+                logString += "Message Timestamp: " + string(formattedTimestamp) +"\n";
+                break;
+            }
+        case CommunicationParameters::SUBSCRIBERS:
+            {
+                vector<string> subscribers = arrayStringToVectorString(response.getResponseArgument(parameter));
+                logString += "Subscribers: ";
+                for (string subscriber : subscribers) {
+                    logString += subscriber;
+                    if (subscriber != subscribers.back()) {
+                        logString += ", ";
+                    }
+                }
+                logString += "\n";
+                break;
+            }
+        default:
+            logString += communicationParameterToStringDictionary[parameter] + ": " + response.getResponseArgument(parameter) + "\n";
+            break;
         }
     }
 
     spdlog::info(logString);
+    spdlog::debug("Response logged.");
 }

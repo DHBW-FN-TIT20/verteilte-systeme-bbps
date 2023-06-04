@@ -47,7 +47,7 @@ COMMAND | --get-topic-status &lt;TOPIC1&gt; &lt;...&gt; &lt;TOPICn&gt; | get the
 
 command | {{ ARGUMENT_NAME }}
 --- | ---
-SUBSCRIBE | topicName
+SUBSCRIBE | topicName, clientPort
 UNSUBSCRIBE | topicName
 PUBLISH | topicName, message
 LIST_TOPICS | 
