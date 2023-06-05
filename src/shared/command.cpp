@@ -1,9 +1,8 @@
 /**
  * @file commands.cpp
- * @author Henry Schuler
  * @brief Implements a class that represents a command that can be sent from the client to the server.
  * @version 0.1
- * @date 2023-06-02
+ * @date 2023-06-04
  *
  * @copyright Copyright (c) 2023
  *
@@ -12,22 +11,23 @@
 #include <spdlog/spdlog.h>
 
 #include "command.h"
+#include "communicationParameters.h"
 
 /**
  * @brief A dictionary that maps command identifiers to their respective argument names.
  * This is used to construct a command object with the correct number of arguments.
  */
-static map<CommandIdentifiers, vector<string>> commandDictionary = {
-    {CommandIdentifiers::SUBSCRIBE, {"topicName"}},
-    {CommandIdentifiers::UNSUBSCRIBE, {"topicName"}},
-    {CommandIdentifiers::PUBLISH, {"topicName", "message"}},
+static map<CommandIdentifiers, vector<CommunicationParameters>> commandDictionary = {
+    {CommandIdentifiers::SUBSCRIBE, {CommunicationParameters::TOPIC_NAME, CommunicationParameters::CLIENT_PORT}},
+    {CommandIdentifiers::UNSUBSCRIBE, {CommunicationParameters::TOPIC_NAME}},
+    {CommandIdentifiers::PUBLISH, {CommunicationParameters::TOPIC_NAME, CommunicationParameters::MESSAGE}},
     {CommandIdentifiers::LIST_TOPICS, {}},
-    {CommandIdentifiers::GET_TOPIC_STATUS, {"topicName"}}
+    {CommandIdentifiers::GET_TOPIC_STATUS, {CommunicationParameters::TOPIC_NAME}}
 };
 
 Command::Command(CommandIdentifiers commandIdentifier) {
     // Get the argument names for the command
-    vector<string> commandArgumentNames = commandDictionary[commandIdentifier];
+    vector<CommunicationParameters> commandArgumentNames = commandDictionary[commandIdentifier];
 
     this->commandIdentifier = commandIdentifier;
     this->availableCommandArguments = commandArgumentNames;
@@ -40,7 +40,7 @@ Command::Command(CommandIdentifiers commandIdentifier) {
 
 Command::~Command() {}
 
-bool Command::setCommandArgument(string argumentName, string argumentValue) {
+bool Command::setCommandArgument(CommunicationParameters argumentName, string argumentValue) {
     // Check if the argument exists
     if (find(this->availableCommandArguments.begin(), this->availableCommandArguments.end(), argumentName) == this->availableCommandArguments.end()) {
         spdlog::error("Command argument does not exist: {}", argumentName);
@@ -56,7 +56,7 @@ bool Command::setCommandArgument(string argumentName, string argumentValue) {
     return true;
 }
 
-string Command::getCommandArgument(string argumentName) const {
+string Command::getCommandArgument(CommunicationParameters argumentName) const {
     // Check if the argument exists
     if (find(this->availableCommandArguments.begin(), this->availableCommandArguments.end(), argumentName) == this->availableCommandArguments.end()) {
         spdlog::error("Command argument does not exist: {}", argumentName);
@@ -94,13 +94,14 @@ string Command::serialize() const {
 
     Json::Value arguments;
     for (int i = 0; i < this->commandArguments.size(); i++) {
-        arguments[availableCommandArguments[i]] = this->commandArguments[i];
+        arguments[communicationParameterToStringDictionary[this->availableCommandArguments[i]]] = this->commandArguments[i];
     }
 
     root["arguments"] = arguments;
 
     // stringify JSON object
     Json::StreamWriterBuilder builder;
+    builder["indentation"] = "";
 
     return Json::writeString(builder, root);
 }
@@ -136,7 +137,7 @@ Command Command::deserialize(string serializedCommand) {
 
     // Set the arguments
     for (int i = 0; i < keys.size(); i++) {
-        if (!command.setCommandArgument(keys[i], arguments[keys[i]].asString())) {
+        if (!command.setCommandArgument(stringToCommunicationParameterDictionary[keys[i]], arguments[keys[i]].asString())) {
             spdlog::error("Failed to set command argument: {}", keys[i]);
             throw logic_error("Failed to set command argument");
         }
