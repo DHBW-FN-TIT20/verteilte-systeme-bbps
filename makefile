@@ -5,6 +5,12 @@ INC = -I ./include
 command.o: src/shared/command.h src/shared/command.cpp
 	g++ -c src/shared/command.cpp -o command.o $(INC)
 
+message.o: src/shared/message.h src/shared/message.cpp
+	g++ -c src/shared/message.cpp -o message.o $(INC)
+
+response.o: src/shared/response.h src/shared/response.cpp
+	g++ -c src/shared/response.cpp -o response.o $(INC)
+
 # client
 
 client.o: src/client/client.h src/client/client.cpp
@@ -13,9 +19,9 @@ client.o: src/client/client.h src/client/client.cpp
 main_client.o: src/client/main.cpp
 	g++ -c src/client/main.cpp -o main_client.o $(INC)
 
-client.exe: client.o main_client.o command.o
-	g++ client.o main_client.o command.o -o client.exe -ljsoncpp
-	rm -f client.o main_client.o command.o
+client.exe: client.o main_client.o command.o message.o response.o
+	g++ client.o main_client.o command.o message.o response.o -o client.exe -ljsoncpp
+	rm -f client.o main_client.o
 
 # server
 
@@ -31,7 +37,7 @@ topic.o: src/server/topic.h src/server/topic.cpp
 clientconnection.o: src/server/clientconnection.h src/server/clientconnection.cpp
 	g++ -c src/server/clientconnection.cpp -o clientconnection.o $(INC)
 
-server.exe: server.o main_server.o  command.o
+server.exe: server.o main_server.o  command.o message.o response.o
 	g++ server.o main_server.o topic.o clientconnection.o command.o -o server.exe -ljsoncpp
 	rm -f server.o main_server.o
 
@@ -39,7 +45,7 @@ server.exe: server.o main_server.o  command.o
 # general
 
 clean:
-	rm -f client.o server.o main_client.o main_server.o clientconnection.o topic.o command.o client.exe server.exe
+	rm -f client.o server.o main_client.o main_server.o clientconnection.o topic.o command.o message.o response.o client.exe server.exe
 
 all: client.exe server.exe
 
