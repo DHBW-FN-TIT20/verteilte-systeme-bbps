@@ -1,5 +1,6 @@
 #include "server.h"
 #include "../shared/command.h"
+#include "../shared/response.h"
 #include <iostream>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -21,7 +22,7 @@ void handleApproachingClient(int clientSocket)
         return;
     }
     // Process the received data
-    //TODO remove for Production
+    // TODO remove for Production
     string receivedData(buffer, bytesRead);
     cout << "Received from client: " << receivedData << std::endl;
 
@@ -37,25 +38,40 @@ void handleApproachingClient(int clientSocket)
         cerr << e.what() << endl;
         // TODO Return internal server error
     }
+    
+    Response *response;
 
     switch ((*command).commandIdentifier)
     {
     case CommandIdentifiers::SUBSCRIBE:
-        //TODO
+        this->handleSubsscribeRequest(clientSocket, (*command).commandArguments[0]);
         break;
     case CommandIdentifiers::UNSUBSCRIBE:
-        //TODO      
+        response = &this->handleUnsubscribeRequest(clientSocket, (*command).commandArguments[0]);
         break;
     case CommandIdentifiers::LIST_TOPICS:
-        //TODO
+        response = &this->handleListTopicsRequest((*command).commandArguments[0]);
         break;
     case CommandIdentifiers::GET_TOPIC_STATUS:
-        //TODO
+        response = &this->handleGetTopicStatusRequest((*command).commandArguments[0]);
         break;
     default:
         break;
     }
 
+    // serialize the response
+    string serializedResponse = (*response).serialize();
+
+    // send the response to the client
+    int bytesSent = send(clientSocket, serializedResponse.c_str(), serializedResponse.length(), 0);
+    if (bytesSent != serializedResponse.length())
+    {
+        cerr << "Error sending data to client" << endl;
+        close(clientSocket);
+        return;
+    }
+
+    // close the connection
     close(clientSocket);
 }
 
@@ -125,4 +141,24 @@ Server::Server(int port, int topicTimeout)
 Server::~Server()
 {
     cout << "Stopping server" << endl;
+}
+
+Response Server::handleSubsscribeRequest(int socket, string topicName)
+{
+    // TODO
+}
+
+Response Server::handleUnsubscribeRequest(int socket, string topicName)
+{
+    // TODO
+}
+
+Response Server::handleListTopics()
+{
+    // TODO
+}
+
+Response Server::handleGetTopicStatus(string topicName)
+{
+    // TODO
 }

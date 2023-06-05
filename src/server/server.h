@@ -98,6 +98,10 @@ class Server {
         list<Topic> topics;
         list<ClientConnection> clientConnections;
         thread timeoutCheckerThread;
+        Response handleSubsscribeRequest(int socket, string topicName);
+        Response handleUnsubscribeRequest(int socket, string topicName);
+        Response handleListTopics();
+        Response handleGetTopicStatus(string topicName);
 };
 
 #endif
