@@ -38,9 +38,6 @@ void handleApproachingClient(int clientSocket)
         // TODO Return internal server error
     }
 
-    // Parse from pointer to object
-    Command cmd = *command;
-
     switch ((*command).commandIdentifier)
     {
     case CommandIdentifiers::SUBSCRIBE:
