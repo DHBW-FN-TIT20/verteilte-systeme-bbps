@@ -25,6 +25,10 @@ static map<CommandIdentifiers, vector<CommunicationParameters>> commandDictionar
     {CommandIdentifiers::GET_TOPIC_STATUS, {CommunicationParameters::TOPIC_NAME}}
 };
 
+Command::Command() {
+
+}
+
 Command::Command(CommandIdentifiers commandIdentifier) {
     // Get the argument names for the command
     vector<CommunicationParameters> commandArgumentNames = commandDictionary[commandIdentifier];

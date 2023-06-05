@@ -19,7 +19,10 @@ static map<CommandIdentifiers, vector<CommunicationParameters>> responseDictiona
     {CommandIdentifiers::PUBLISH, {}},
     {CommandIdentifiers::LIST_TOPICS, {CommunicationParameters::TOPICS}},
     {CommandIdentifiers::GET_TOPIC_STATUS, {CommunicationParameters::MESSAGE_TIMESTAMP, CommunicationParameters::SUBSCRIBERS}}};
-
+Response::Response()
+{
+    
+}
 Response::Response(CommandIdentifiers commandIdentifier)
 {
     // Get the argument names for the response

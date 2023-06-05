@@ -33,6 +33,12 @@ class Response {
         Response(CommandIdentifiers commandIdentifier);
 
         /**
+         * @brief Construct a new Response object
+         * 
+         */
+        Response();
+
+        /**
          * @brief Destroy the Response object
          * 
          */
