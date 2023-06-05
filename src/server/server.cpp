@@ -1,6 +1,5 @@
 #include "server.h"
 #include "../shared/command.h"
-#include "../shared/response.h"
 #include <iostream>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -10,7 +9,7 @@
 
 using namespace std;
 
-void handleApproachingClient(int clientSocket)
+void Server::handleApproachingClient(int clientSocket)
 {
     char buffer[1024];
 
@@ -28,10 +27,10 @@ void handleApproachingClient(int clientSocket)
 
     // deserialize the received data
     // try catch to catch the exception if the string is not a valid json
-    Command *command;
+    Command command;
     try
     {
-        command = &Command::deserialize(buffer);
+        command = Command::deserialize(receivedData);
     }
     catch (const exception &e)
     {
@@ -39,28 +38,28 @@ void handleApproachingClient(int clientSocket)
         // TODO Return internal server error
     }
     
-    Response *response;
+    Response response;
 
-    switch ((*command).commandIdentifier)
+    switch (command.commandIdentifier)
     {
     case CommandIdentifiers::SUBSCRIBE:
-        this->handleSubsscribeRequest(clientSocket, (*command).commandArguments[0]);
+        response = this->handleSubsscribeRequest(clientSocket, command.getCommandArgument(CommunicationParameters::TOPIC_NAME));
         break;
     case CommandIdentifiers::UNSUBSCRIBE:
-        response = &this->handleUnsubscribeRequest(clientSocket, (*command).commandArguments[0]);
+        response = this->handleUnsubscribeRequest(clientSocket, command.getCommandArgument(CommunicationParameters::TOPIC_NAME));
         break;
     case CommandIdentifiers::LIST_TOPICS:
-        response = &this->handleListTopicsRequest((*command).commandArguments[0]);
+        response = this->handleListTopics();
         break;
     case CommandIdentifiers::GET_TOPIC_STATUS:
-        response = &this->handleGetTopicStatusRequest((*command).commandArguments[0]);
+        response = this->handleGetTopicStatus(command.getCommandArgument(CommunicationParameters::TOPIC_NAME)); 
         break;
     default:
         break;
     }
 
     // serialize the response
-    string serializedResponse = (*response).serialize();
+    string serializedResponse = response.serialize();
 
     // send the response to the client
     int bytesSent = send(clientSocket, serializedResponse.c_str(), serializedResponse.length(), 0);
@@ -75,7 +74,7 @@ void handleApproachingClient(int clientSocket)
     close(clientSocket);
 }
 
-void startServer(int port, int topicTimeout)
+void Server::startServer(int port, int topicTimeout)
 {
     int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (serverSocket < 0)

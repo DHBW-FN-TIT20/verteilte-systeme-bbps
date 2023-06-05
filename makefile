@@ -37,7 +37,7 @@ topic.o: src/server/topic.h src/server/topic.cpp
 clientconnection.o: src/server/clientconnection.h src/server/clientconnection.cpp
 	g++ -c src/server/clientconnection.cpp -o clientconnection.o $(INC)
 
-server.exe: server.o main_server.o  command.o message.o response.o
+server.exe: server.o main_server.o command.o message.o response.o
 	g++ server.o main_server.o topic.o clientconnection.o command.o -o server.exe -ljsoncpp
 	rm -f server.o main_server.o
 

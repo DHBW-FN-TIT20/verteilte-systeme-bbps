@@ -7,6 +7,7 @@
 
 #include "topic.h"
 #include "clientconnection.h"
+#include "../shared/response.h"
 
 using namespace std;
 
@@ -98,6 +99,8 @@ class Server {
         list<Topic> topics;
         list<ClientConnection> clientConnections;
         thread timeoutCheckerThread;
+        void startServer(int port, int topicTimeout);
+        void handleApproachingClient(int clientSocket);
         Response handleSubsscribeRequest(int socket, string topicName);
         Response handleUnsubscribeRequest(int socket, string topicName);
         Response handleListTopics();
