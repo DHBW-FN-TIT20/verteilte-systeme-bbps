@@ -2,6 +2,7 @@
 #define COMMUNICATION_PARAMETERS_H
 
 #include <string>
+#include <map>
 
 using namespace std;
 
