@@ -43,7 +43,7 @@ Command::~Command() {}
 bool Command::setCommandArgument(CommunicationParameters argumentName, string argumentValue) {
     // Check if the argument exists
     if (find(this->availableCommandArguments.begin(), this->availableCommandArguments.end(), argumentName) == this->availableCommandArguments.end()) {
-        spdlog::error("Command argument does not exist: {}", argumentName);
+        spdlog::error("Command argument does not exist: {}", communicationParameterToStringDictionary[argumentName]);
         return false;
     }
 
@@ -59,7 +59,7 @@ bool Command::setCommandArgument(CommunicationParameters argumentName, string ar
 string Command::getCommandArgument(CommunicationParameters argumentName) const {
     // Check if the argument exists
     if (find(this->availableCommandArguments.begin(), this->availableCommandArguments.end(), argumentName) == this->availableCommandArguments.end()) {
-        spdlog::error("Command argument does not exist: {}", argumentName);
+        spdlog::error("Command argument does not exist: {}", communicationParameterToStringDictionary[argumentName]);
         throw runtime_error("Command argument does not exist");
     }
 
@@ -74,7 +74,7 @@ bool Command::isValid() const {
     // Check if all arguments are set
     for (int i = 0; i < this->commandArguments.size(); i++) {
         if (this->commandArguments[i] == "") {
-            spdlog::debug("Command argument is not set: {}", this->availableCommandArguments[i]);
+            spdlog::debug("Command argument is not set: {}", communicationParameterToStringDictionary[this->availableCommandArguments[i]]);
             return false;
         }
     }

@@ -1,3 +1,12 @@
+/**
+ * @file arrayStringToVectorString.h
+ * @brief This file contains a function that converts a array notation string to a vector of strings.
+ * @version 0.1
+ * @date 2023-06-05
+ * 
+ * @copyright Copyright (c) 2023
+ * 
+ */
 #ifndef ARRAY_STRING_TO_VECTOR_STRING_H
 #define ARRAY_STRING_TO_VECTOR_STRING_H
 
@@ -7,6 +16,13 @@
 
 using namespace std;
 
+/**
+ * @brief Converts a array notation string to a vector of strings.
+ * Example: "[a, b, c]" -> {"a", "b", "c"}
+ * 
+ * @param stringToConvert String in array notation.
+ * @return vector<string> 
+ */
 static vector<string> arrayStringToVectorString(const string& stringToConvert) {
     vector<string> result;
 

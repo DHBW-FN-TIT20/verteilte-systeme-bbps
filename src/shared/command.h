@@ -86,7 +86,6 @@ class Command {
          * @brief Specifies the available command argument names.
          */
         vector<CommunicationParameters> availableCommandArguments;
-
         /**
          * @brief Specifies the command arguments.
          */
