@@ -109,10 +109,10 @@ void Client::subscribeTopic(string topicName) {
     spdlog::debug("--------------------");
     spdlog::debug("Subscribing to topic: {}", topicName);
 
-    Command subscribe(CommandIdentifiers::SUBSCRIBE);
+    Command subscribe(CommandIdentifiers::subscribe);
 
-    subscribe.setCommandArgument(CommunicationParameters::TOPIC_NAME, topicName);
-    subscribe.setCommandArgument(CommunicationParameters::CLIENT_PORT, to_string(this->port));
+    subscribe.setCommandArgument(CommunicationParameters::topicName, topicName);
+    subscribe.setCommandArgument(CommunicationParameters::clientPort, to_string(this->port));
 
     sendMessage(subscribe);
     
@@ -123,9 +123,9 @@ void Client::unsubscribe(string topicName) {
     spdlog::debug("--------------------");
     spdlog::debug("Unsubscribing from topic: {}", topicName);
 
-    Command unsubscribe(CommandIdentifiers::UNSUBSCRIBE);
+    Command unsubscribe(CommandIdentifiers::unsubscribe);
 
-    unsubscribe.setCommandArgument(CommunicationParameters::TOPIC_NAME, topicName);
+    unsubscribe.setCommandArgument(CommunicationParameters::topicName, topicName);
 
     sendMessage(unsubscribe);
 
@@ -136,10 +136,10 @@ void Client::publishTopic(string topicName, string message) {
     spdlog::debug("--------------------");
     spdlog::debug("Publishing message: {} to topic: {}", message, topicName);
 
-    Command publish = Command(CommandIdentifiers::PUBLISH);
+    Command publish = Command(CommandIdentifiers::publish);
 
-    publish.setCommandArgument(CommunicationParameters::TOPIC_NAME, topicName);
-    publish.setCommandArgument(CommunicationParameters::MESSAGE, message);
+    publish.setCommandArgument(CommunicationParameters::topicName, topicName);
+    publish.setCommandArgument(CommunicationParameters::message, message);
 
     sendMessage(publish);
 
@@ -150,7 +150,7 @@ void Client::listTopics() {
     spdlog::debug("--------------------");
     spdlog::debug("Listing topics...");
 
-    Command listTopics = Command(CommandIdentifiers::LIST_TOPICS);
+    Command listTopics = Command(CommandIdentifiers::listTopics);
 
     sendMessage(listTopics);
 
@@ -161,9 +161,9 @@ void Client::getTopicStatus(string topicName) {
     spdlog::debug("--------------------");
     spdlog::debug("Getting status of topic: {}", topicName);
 
-    Command getTopicStatus = Command(CommandIdentifiers::GET_TOPIC_STATUS);
+    Command getTopicStatus = Command(CommandIdentifiers::getTopicStatus);
 
-    getTopicStatus.setCommandArgument(CommunicationParameters::TOPIC_NAME, topicName);
+    getTopicStatus.setCommandArgument(CommunicationParameters::topicName, topicName);
 
     sendMessage(getTopicStatus);
     
@@ -280,7 +280,7 @@ void Client::logResponse(const Response &response, const string &senderIp, const
 
     for (CommunicationParameters parameter : parameters) {
         switch (parameter) {
-        case CommunicationParameters::TOPICS:
+        case CommunicationParameters::topics:
             {
                 vector<string> topics = arrayStringToVectorString(response.getResponseArgument(parameter));
                 logString += "Topics: ";
@@ -293,7 +293,7 @@ void Client::logResponse(const Response &response, const string &senderIp, const
                 logString += "\n";
                 break;
             }
-        case CommunicationParameters::MESSAGE_TIMESTAMP:
+        case CommunicationParameters::messageTimestamp:
             {
                 time_t timestamp = static_cast<time_t>(stoll(response.getResponseArgument(parameter)));
                 char formattedTimestamp[21];
@@ -302,7 +302,7 @@ void Client::logResponse(const Response &response, const string &senderIp, const
                 logString += "Message Timestamp: " + string(formattedTimestamp) +"\n";
                 break;
             }
-        case CommunicationParameters::SUBSCRIBERS:
+        case CommunicationParameters::subscribers:
             {
                 vector<string> subscribers = arrayStringToVectorString(response.getResponseArgument(parameter));
                 logString += "Subscribers: ";

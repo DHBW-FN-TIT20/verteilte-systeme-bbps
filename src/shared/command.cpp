@@ -18,11 +18,11 @@
  * This is used to construct a command object with the correct number of arguments.
  */
 static map<CommandIdentifiers, vector<CommunicationParameters>> commandDictionary = {
-    {CommandIdentifiers::SUBSCRIBE, {CommunicationParameters::TOPIC_NAME, CommunicationParameters::CLIENT_PORT}},
-    {CommandIdentifiers::UNSUBSCRIBE, {CommunicationParameters::TOPIC_NAME}},
-    {CommandIdentifiers::PUBLISH, {CommunicationParameters::TOPIC_NAME, CommunicationParameters::MESSAGE}},
-    {CommandIdentifiers::LIST_TOPICS, {}},
-    {CommandIdentifiers::GET_TOPIC_STATUS, {CommunicationParameters::TOPIC_NAME}}
+    {CommandIdentifiers::subscribe, {CommunicationParameters::topicName, CommunicationParameters::clientPort}},
+    {CommandIdentifiers::unsubscribe, {CommunicationParameters::topicName}},
+    {CommandIdentifiers::publish, {CommunicationParameters::topicName, CommunicationParameters::message}},
+    {CommandIdentifiers::listTopics, {}},
+    {CommandIdentifiers::getTopicStatus, {CommunicationParameters::topicName}}
 };
 
 Command::Command(CommandIdentifiers commandIdentifier) {
