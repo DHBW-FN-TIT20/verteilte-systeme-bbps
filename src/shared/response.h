@@ -71,7 +71,7 @@ class Response {
         /**
          * @brief Get the Response Argument value as string.
          * 
-         * @throws logic_error if the argument does not exist.
+         * @throws runtime_error if the argument does not exist.
          * @param argumentName Name of the argument.
          * @return string Value of the argument.
          */
@@ -110,7 +110,7 @@ class Response {
         /**
          * @brief Deserialize a JSON string to a response object.
          * 
-         * @throws logic_error if the JSON string is invalid (cannot be parsed).
+         * @throws runtime_error if the JSON string is invalid (cannot be parsed).
          * @param commandIdentifier Corresponding command identifier.
          * @param serializedResponse JSON serialized response.
          * @return Response 

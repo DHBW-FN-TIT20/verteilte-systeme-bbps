@@ -23,8 +23,10 @@ int getPortNumber(const string &portStr);
  * @endcode
  */
 int main(int argc, char** argv) {
+    // spdlog::set_level(spdlog::level::debug);
+
     spdlog::info("Initializing client...");
-    spdlog::info("Parsing CLI arguments...");
+    spdlog::debug("Parsing CLI arguments...");
 
     int port = 0;
     string serverAddress = "127.0.0.1";
@@ -47,7 +49,7 @@ int main(int argc, char** argv) {
                 return 1;
             }
 
-            spdlog::info("Port: {}", port);
+            spdlog::debug("Port: {}", port);
 
             i += 1;
         } else if (arg == "--server-address" && argc > i + 1) {
@@ -59,7 +61,7 @@ int main(int argc, char** argv) {
                 return 1;
             }
 
-            spdlog::info("Server address: {}", serverAddress);
+            spdlog::debug("Server address: {}", serverAddress);
 
             i += 1;
         } else if (arg == "--server-port" && argc > i + 1) {
@@ -73,12 +75,12 @@ int main(int argc, char** argv) {
                 return 1;
             }
 
-            spdlog::info("Server-Port: {}", port);
+            spdlog::debug("Server-Port: {}", port);
 
             i += 1;
         } else if (arg == "--help") {
             // Print help message and terminate
-            spdlog::info("Printing help information...");
+            spdlog::debug("Printing help information...");
             printUsageInformation();
             spdlog::info("Shutting down...");
             return 0;
@@ -97,7 +99,7 @@ int main(int argc, char** argv) {
 
                     arguments.push_back(topicName);
                 
-                    spdlog::info("-> Subscribing to topic: {}", topicName);
+                    spdlog::debug("-> Subscribing to topic: {}", topicName);
 
                     i += 1;
                 }
@@ -108,18 +110,18 @@ int main(int argc, char** argv) {
                 arguments.push_back(topicName);
                 arguments.push_back(topicData);
 
-                spdlog::info("-> Publishing data: {} to topic: {}", topicData, topicName);
+                spdlog::debug("-> Publishing data: {} to topic: {}", topicData, topicName);
 
                 i += 2;
             } else if (arg == "--list-topics" && arg == command) {
-                spdlog::info("-> List topics");
+                spdlog::debug("-> List topics");
             } else if (arg == "--get-topic-status" && arg == command && argc > i + 1) {
                 while (argc > i + 1 && argv[i + 1][0] != '-' && argv[i + 1][1] != '-') {
                     string topicName = argv[i + 1];
 
                     arguments.push_back(topicName);
 
-                    spdlog::info("-> Get topic status for topic: {}", topicName);
+                    spdlog::debug("-> Get topic status for topic: {}", topicName);
 
                     i += 1;
                 }
@@ -132,8 +134,8 @@ int main(int argc, char** argv) {
         }
     }
 
-    spdlog::info("Successfully parsed CLI arguments.");
-    spdlog::info("Starting client...");
+    spdlog::debug("Successfully parsed CLI arguments.");
+    spdlog::debug("Starting client...");
 
     Client* client;
 
@@ -146,7 +148,7 @@ int main(int argc, char** argv) {
     }
 
     spdlog::info("Successfully started client.");
-    spdlog::info("Executing {}...", command);
+    spdlog::debug("Executing {}...", command);
 
     if (command == "--subscribe") {
         for (string topicName : arguments) {
@@ -165,6 +167,9 @@ int main(int argc, char** argv) {
         spdlog::error("Shutting down...");
         return 1;
     }
+
+    cout << "Press ENTER key to exit..." << endl;
+    cin.get();
 
     spdlog::info("Shutting down...");
     delete client;

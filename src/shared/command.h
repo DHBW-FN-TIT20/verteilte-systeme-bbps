@@ -48,7 +48,7 @@ class Command {
 
         /**
          * @brief Get the Command Argument value.
-         * @throws logic_error if the argument does not exist.
+         * @throws runtime_error if the argument does not exist.
          * @param argumentName The name of the argument.
          * @return string The value of the argument.
          */
@@ -63,14 +63,14 @@ class Command {
 
         /**
          * @brief Serializes the command to a json string.
-         * @throws logic_error if the command cannot be serialized.
+         * @throws runtime_error if the command cannot be serialized.
          * @return string The json-serialized command.
          */
         string serialize() const;
 
         /**
          * @brief Deserializes a json string to a command.
-         * @throws logic_error if the command cannot be deserialized or does not have all required values.
+         * @throws runtime_error if the command cannot be deserialized or does not have all required values.
          * @param serializedCommand The json-serialized command.
          * @return Command The deserialized command.
          */
@@ -86,7 +86,6 @@ class Command {
          * @brief Specifies the available command argument names.
          */
         vector<CommunicationParameters> availableCommandArguments;
-
         /**
          * @brief Specifies the command arguments.
          */

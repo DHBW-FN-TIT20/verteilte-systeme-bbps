@@ -66,6 +66,7 @@ class Message {
         /**
          * @brief Deserialize a JSON string to a message object.
          * 
+         * @throws runtime_error if the JSON string is invalid.
          * @param serializedMessage JSON string of the message object.
          * @return Message The extracted message object.
          */

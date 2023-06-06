@@ -4,8 +4,13 @@
 #include <string>
 #include <ctime>
 #include <thread>
+#include <netinet/in.h>
+#include <jsoncpp/json/json.h>
 
+#include "../shared/command.h"
 #include "../shared/statuscode.h"
+#include "../shared/response.h"
+#include "../shared/message.h"
 
 using namespace std;
 
@@ -33,7 +38,6 @@ class Client {
          * Terminates the \p messageThread.
          */
         ~Client();
-        
         
         /**
          * @brief Subscribes to a topic.
@@ -95,19 +99,38 @@ class Client {
          */
         void handleMessages();
         
-        /**
-         * @brief Prints a message with a timestamp.
-         *
-         * @param message The message to print.
-         * @param timestamp The timestamp of the message.
-         */
-        void printMessage(string message, time_t timestamp);
-
     private:
         int port;
         string serverAddress;
         int serverPort;
+        int serverSocket;
+        struct sockaddr_in serverAddr;
+        int messageSocket;
+        struct sockaddr_in clientAddr;
+        // Atomic bool does not need a mutex
+        atomic<bool> messageThreadRunning;
         thread messageThread;
+
+        /**
+         * @brief Sends a given command to the server.
+         * 
+         * @param command Object specifying the parameters to send.
+         */
+        void sendMessage(Command &command);
+        /**
+         * @brief Prints the information of a received response to the console.
+         * 
+         * @param response Object containing the response information.
+         * @param senderIp IP of the sender (server).
+         * @param senderPort Port of the sender (server).
+         */
+        void logResponse(const Response &response, const string &senderIp, const string &senderPort);
+        /**
+         * @brief Prints a message to a topic with a timestamp to the console.
+         *
+         * @param message The message object containing all informations.
+         */
+        void printMessage(Message message);
 };
 
 #endif
