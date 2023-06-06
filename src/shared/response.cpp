@@ -14,11 +14,11 @@
 #include "communicationParameters.h"
 
 static map<CommandIdentifiers, vector<CommunicationParameters>> responseDictionary = {
-    {CommandIdentifiers::SUBSCRIBE, {}},
-    {CommandIdentifiers::UNSUBSCRIBE, {}},
-    {CommandIdentifiers::PUBLISH, {}},
-    {CommandIdentifiers::LIST_TOPICS, {CommunicationParameters::TOPICS}},
-    {CommandIdentifiers::GET_TOPIC_STATUS, {CommunicationParameters::MESSAGE_TIMESTAMP, CommunicationParameters::SUBSCRIBERS}}};
+    {CommandIdentifiers::subscribe, {}},
+    {CommandIdentifiers::unsubscribe, {}},
+    {CommandIdentifiers::publish, {}},
+    {CommandIdentifiers::listTopics, {CommunicationParameters::topics}},
+    {CommandIdentifiers::getTopicStatus, {CommunicationParameters::messageTimestamp, CommunicationParameters::subscribers}}};
 
 Response::Response(CommandIdentifiers commandIdentifier) {
     // Get the argument names for the response
