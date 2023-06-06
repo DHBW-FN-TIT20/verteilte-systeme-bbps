@@ -6,6 +6,7 @@
 #include <thread>
 #include <netinet/in.h>
 #include <jsoncpp/json/json.h>
+#include <atomic>
 
 #include "../shared/command.h"
 #include "../shared/statuscode.h"
