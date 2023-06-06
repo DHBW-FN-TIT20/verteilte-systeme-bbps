@@ -18,11 +18,11 @@
  * This is used to construct a command object with the correct number of arguments.
  */
 static map<CommandIdentifiers, vector<CommunicationParameters>> commandDictionary = {
-    {CommandIdentifiers::SUBSCRIBE, {CommunicationParameters::TOPIC_NAME, CommunicationParameters::CLIENT_PORT}},
-    {CommandIdentifiers::UNSUBSCRIBE, {CommunicationParameters::TOPIC_NAME}},
-    {CommandIdentifiers::PUBLISH, {CommunicationParameters::TOPIC_NAME, CommunicationParameters::MESSAGE}},
-    {CommandIdentifiers::LIST_TOPICS, {}},
-    {CommandIdentifiers::GET_TOPIC_STATUS, {CommunicationParameters::TOPIC_NAME}}
+    {CommandIdentifiers::subscribe, {CommunicationParameters::topicName, CommunicationParameters::clientPort}},
+    {CommandIdentifiers::unsubscribe, {CommunicationParameters::topicName}},
+    {CommandIdentifiers::publish, {CommunicationParameters::topicName, CommunicationParameters::message}},
+    {CommandIdentifiers::listTopics, {}},
+    {CommandIdentifiers::getTopicStatus, {CommunicationParameters::topicName}}
 };
 
 Command::Command() {
@@ -47,7 +47,7 @@ Command::~Command() {}
 bool Command::setCommandArgument(CommunicationParameters argumentName, string argumentValue) {
     // Check if the argument exists
     if (find(this->availableCommandArguments.begin(), this->availableCommandArguments.end(), argumentName) == this->availableCommandArguments.end()) {
-        spdlog::error("Command argument does not exist: {}", argumentName);
+        spdlog::error("Command argument does not exist: {}", communicationParameterToStringDictionary[argumentName]);
         return false;
     }
 
@@ -63,8 +63,8 @@ bool Command::setCommandArgument(CommunicationParameters argumentName, string ar
 string Command::getCommandArgument(CommunicationParameters argumentName) const {
     // Check if the argument exists
     if (find(this->availableCommandArguments.begin(), this->availableCommandArguments.end(), argumentName) == this->availableCommandArguments.end()) {
-        spdlog::error("Command argument does not exist: {}", argumentName);
-        throw logic_error("Command argument does not exist");
+        spdlog::error("Command argument does not exist: {}", communicationParameterToStringDictionary[argumentName]);
+        throw runtime_error("Command argument does not exist");
     }
 
     // Get the index of the argument
@@ -78,7 +78,7 @@ bool Command::isValid() const {
     // Check if all arguments are set
     for (int i = 0; i < this->commandArguments.size(); i++) {
         if (this->commandArguments[i] == "") {
-            spdlog::debug("Command argument is not set: {}", this->availableCommandArguments[i]);
+            spdlog::debug("Command argument is not set: {}", communicationParameterToStringDictionary[this->availableCommandArguments[i]]);
             return false;
         }
     }
@@ -90,7 +90,7 @@ string Command::serialize() const {
     // Check if all arguments are set
     if (!this->isValid()) {
         spdlog::error("Not all arguments are set");
-        throw logic_error("Not all arguments are set");
+        throw runtime_error("Not all arguments are set");
     }
 
     Json::Value root;
@@ -121,12 +121,12 @@ Command Command::deserialize(string serializedCommand) {
 
     if (!is_parsed) {
         spdlog::error("Failed to parse JSON command: {}", errors);
-        throw logic_error("Failed to parse JSON command");
+        throw runtime_error("Failed to parse JSON command");
     }
 
     if (!root.isMember("command") || !root.isMember("arguments")) {
         spdlog::error("Command does not have all required values");
-        throw logic_error("Command does not have all required values");
+        throw runtime_error("Command does not have all required values");
     }
 
     // Get the command identifier
@@ -143,14 +143,14 @@ Command Command::deserialize(string serializedCommand) {
     for (int i = 0; i < keys.size(); i++) {
         if (!command.setCommandArgument(stringToCommunicationParameterDictionary[keys[i]], arguments[keys[i]].asString())) {
             spdlog::error("Failed to set command argument: {}", keys[i]);
-            throw logic_error("Failed to set command argument");
+            throw runtime_error("Failed to set command argument");
         }
     }
 
     // Check if the command is valid
     if (!command.isValid()) {
         spdlog::error("Command is not valid, there are missing arguments.");
-        throw logic_error("Command is not valid, there are missing arguments.");
+        throw runtime_error("Command is not valid, there are missing arguments.");
     }
 
     return command;
