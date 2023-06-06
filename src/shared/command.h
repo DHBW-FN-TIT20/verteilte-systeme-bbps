@@ -32,6 +32,12 @@ class Command {
         Command(CommandIdentifiers commandIdentifier);
 
         /**
+         * @brief Construct a new Command object
+         * 
+         */
+        Command();
+
+        /**
          * @brief Destroy the Command object
          */
         ~Command();
