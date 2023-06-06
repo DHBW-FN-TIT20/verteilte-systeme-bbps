@@ -1,4 +1,4 @@
-# verteilte-systeme-bbpss
+# Publisher-Subscriber-System
 Abschlusstestat für die Vorlesung Verteilte Systeme von Brandenburger, Braun, Patzelt, Schuler und Silberzahn
 
 # Instructions
@@ -35,6 +35,7 @@ COMMAND | --get-topic-status &lt;TOPIC1&gt; &lt;...&gt; &lt;TOPICn&gt; | get the
 
 
 # JSON communication
+
 ## Client request
 ```json
 {
@@ -47,13 +48,14 @@ COMMAND | --get-topic-status &lt;TOPIC1&gt; &lt;...&gt; &lt;TOPICn&gt; | get the
 
 command | {{ ARGUMENT_NAME }}
 --- | ---
-SUBSCRIBE | topicName, clientPort
-UNSUBSCRIBE | topicName
-PUBLISH | topicName, message
-LIST_TOPICS | 
-GET_TOPIC_STATUS | topicName
+subscribe | topicName, clientPort
+unsubscribe | topicName
+publish | topicName, message
+listTopics | 
+getTopicStatus | topicName
 
 ## Server response
+
 ### Default
 ```json
 {
@@ -86,3 +88,51 @@ GET_TOPIC_STATUS | topicName
     "message": string
 }
 ```
+
+## ENUMs
+
+```c++
+enum CommandIdentifiers {
+    subscribe = 0,
+    unsubscribe = 1,
+    publish = 2,
+    listTopics = 3,
+    getTopicStatus = 4
+};
+```
+
+```c++
+enum CommunicationParameters {
+    topicName = 0,
+    clientPort = 1,
+    message = 2,
+    topics = 3,
+    messageTimestamp = 4,
+    subscribers = 5
+};
+```
+
+```c++
+enum Statuscode {
+    success = 0,
+    failed = 1,
+    invalidParameter = 2,
+    internalError = 3,
+};
+```
+
+# Architectural Description with Design Decision Explanation
+
+
+
+# Tests
+
+The project has been tested with automated interface tests.
+The tests can be found in the `src/tests/` folder and can be executed with `make test`.
+A server and a client are initialized and their functionality is tested with predefined JSON requests.
+
+- `test_server.cpp` tests the functionality of the server
+  - ...
+- `test_client.cpp` tests the functionality of the client
+  - ...
+
