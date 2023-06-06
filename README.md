@@ -46,13 +46,19 @@ COMMAND | --get-topic-status &lt;TOPIC1&gt; &lt;...&gt; &lt;TOPICn&gt; | get the
 }
 ```
 
-command | {{ ARGUMENT_NAME }}
---- | ---
-subscribe | topicName, clientPort
-unsubscribe | topicName
-publish | topicName, message
-listTopics | 
-getTopicStatus | topicName
+ID | Command | {{ ARGUMENT_NAME }} | Description | Further Information
+--- | --- | --- | --- | ---
+0 | subscribe | topicName, clientPort | Registers the subscriber on the topic. If the topic does not exist, it is created. | 
+1 | unsubscribe | topicName | Unsubscribes the subscriber from the topic. If no more subscribers are registered on this topic, it will be deleted. | *Topic does not exist → error* <!--TODO:-->
+2 | publish | topicName, message | Publishes a new message on the topic. | *Topic does not exist → error* <!--TODO:-->
+3 | listTopics | - | Requests a list of available topics. |
+4 | getTopicStatus | topicName | Returns the current status of a topic. |
+
+Argument | Type | Value Range, ...
+--- | --- | ---
+topicName | string | 1-255 characters
+clientPort | string | 0-65535 (integer)
+message | string | 1-255 characters 
 
 ## Server response
 
@@ -123,16 +129,8 @@ enum Statuscode {
 
 # Architectural Description with Design Decision Explanation
 
-
+<!--TODO:-->
 
 # Tests
 
-The project has been tested with automated interface tests.
-The tests can be found in the `src/tests/` folder and can be executed with `make test`.
-A server and a client are initialized and their functionality is tested with predefined JSON requests.
-
-- `test_server.cpp` tests the functionality of the server
-  - ...
-- `test_client.cpp` tests the functionality of the client
-  - ...
-
+The project has been tested with automated user tests.
