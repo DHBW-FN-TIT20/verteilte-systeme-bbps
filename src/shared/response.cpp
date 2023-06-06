@@ -33,6 +33,8 @@ Response::Response(CommandIdentifiers commandIdentifier) {
     }
 }
 
+Response::Response() {}
+
 Response::~Response() {}
 
 bool Response::setResponseArgument(CommunicationParameters argumentName, string argumentValue)

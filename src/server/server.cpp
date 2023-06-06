@@ -42,17 +42,17 @@ void Server::handleApproachingClient(int clientSocket)
 
     switch (command.commandIdentifier)
     {
-    case CommandIdentifiers::SUBSCRIBE:
-        response = this->handleSubsscribeRequest(clientSocket, command.getCommandArgument(CommunicationParameters::TOPIC_NAME));
+    case CommandIdentifiers::subscribe:
+        response = this->handleSubsscribeRequest(clientSocket, command.getCommandArgument(CommunicationParameters::topicName));
         break;
-    case CommandIdentifiers::UNSUBSCRIBE:
-        response = this->handleUnsubscribeRequest(clientSocket, command.getCommandArgument(CommunicationParameters::TOPIC_NAME));
+    case CommandIdentifiers::unsubscribe:
+        response = this->handleUnsubscribeRequest(clientSocket, command.getCommandArgument(CommunicationParameters::topicName));
         break;
-    case CommandIdentifiers::LIST_TOPICS:
+    case CommandIdentifiers::listTopics:
         response = this->handleListTopics();
         break;
-    case CommandIdentifiers::GET_TOPIC_STATUS:
-        response = this->handleGetTopicStatus(command.getCommandArgument(CommunicationParameters::TOPIC_NAME)); 
+    case CommandIdentifiers::getTopicStatus:
+        response = this->handleGetTopicStatus(command.getCommandArgument(CommunicationParameters::topicName)); 
         break;
     default:
         break;
@@ -114,7 +114,7 @@ void Server::startServer(int port, int topicTimeout)
         }
 
         // Create a new thread to handle the approaching client connection
-        std::thread threadObj(handleApproachingClient, clientSocket);
+        std::thread threadObj(&Server::handleApproachingClient, this, clientSocket);
         clientThreads.push_back(std::move(threadObj));
     }
 
