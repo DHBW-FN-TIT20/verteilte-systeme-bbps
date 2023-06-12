@@ -96,15 +96,16 @@ class Server {
     private:
         int port;
         int topicTimeout;
-        list<Topic> topics;
-        list<ClientConnection> clientConnections;
+        list<Topic*> topics;
+        list<ClientConnection*> clientConnections;
         thread timeoutCheckerThread;
         void startServer(int port, int topicTimeout);
-        void handleApproachingClient(int clientSocket);
-        Response handleSubsscribeRequest(int socket, string topicName);
-        Response handleUnsubscribeRequest(int socket, string topicName);
+        void handleApproachingClient(int clientSocket, struct sockaddr_in* clientAddress);
+        Response handleSubsscribeRequest(string ipAddress, int port, string topicName);
+        Response handleUnsubscribeRequest(string ipAddres, int port, string topicName);
         Response handleListTopics();
         Response handleGetTopicStatus(string topicName);
+        Response handlePublishRequest(string topicName, string message);
 };
 
 #endif
