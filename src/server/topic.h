@@ -15,9 +15,8 @@ class Topic {
          * @brief Construct a new Topic object
          * 
          * @param name Topic name
-         * @param messageTimeout Timeout in seconds
          */
-        Topic(string name, int messageTimeout);
+        Topic(string name);
 
         /**
          * @brief Destroy the Topic object
@@ -90,10 +89,35 @@ class Topic {
          */
         bool unsubscribe(ClientConnection* clientConnection);
 
+        /**
+         * @brief Get the Topic Name object
+         * 
+         * @return string the Topic Name
+         */
+        string getTopicName();
+
+        /**
+         * @brief Get the Client Connections List
+         * 
+         * @return vector<ClientConnection*> List of all ClientConnections
+         */
+        vector<ClientConnection*> getClientConnections();
+
     private:
-        string messages;
-        time_t messageTimestamp; 
-        list<ClientConnection*> subscriberList;
+        /**
+         * @brief Stores the latest Message
+         * 
+         */
+        string message;
+
+        /**
+         * @brief Stores the name of the topic
+         * 
+         */
+        string topicName;
+
+        time_t messageTimestamp;
+        vector<ClientConnection*> subscriberList;
         time_t timeoutTimestamp;
 };
 
