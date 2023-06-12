@@ -16,9 +16,9 @@ Topic::~Topic()
 bool Topic::hasClient(string address, int port)
 {
     // Check if there is a client with the given address and port in ClientConnections
-    for (ClientConnection* clientConnection : this->subscriberList)
+    for (ClientConnection *clientConnection : this->subscriberList)
     {
-        if(clientConnection->getAddress() == address && clientConnection->getPort() == port)
+        if (clientConnection->getAddress() == address && clientConnection->getPort() == port)
         {
             return true;
         }
@@ -38,7 +38,7 @@ void Topic::setTimeoutTimestamp(time_t timestamp)
 void Topic::publishMessage()
 {
     // Send Message to all subscribers
-    for (ClientConnection* clientConnection : this->subscriberList)
+    for (ClientConnection *clientConnection : this->subscriberList)
     {
         clientConnection->SendMessage(this->message, this->messageTimestamp);
     }
@@ -55,11 +55,23 @@ time_t Topic::getMessageTimestamp()
     return time_t();
 }
 
+bool Topic::subscribe(ClientConnection *clientConnection)
+{
+    // Check if clientConnection is already subscribes
+    if (this->hasClient(clientConnection))
+    {
+        return false;
+    }
+    this->subscriberList.push_back(clientConnection);
+    return true;
+}
+
 bool Topic::unsubscribe(ClientConnection *clientConnection)
 {
     // Remove the clientConnection from the subscriberList
-    for (ClientConnection* clientConnection : this->subscriberList){
-        if(clientConnection->getAddress() == address && clientConnection->getPort() == port)
+    for (ClientConnection *clientConnection : this->subscriberList)
+    {
+        if (clientConnection->getAddress() == address && clientConnection->getPort() == port)
         {
             this->subscriberList.erase(clientConnection);
             return true;
