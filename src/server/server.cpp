@@ -8,6 +8,7 @@
 #include <arpa/inet.h>
 #include <thread>
 #include <vector>
+#include <algorithm>
 
 using namespace std;
 
@@ -37,11 +38,14 @@ void Server::handleApproachingClient(int clientSocket, struct sockaddr_in *clien
     catch (const exception &e)
     {
         cerr << e.what() << endl;
-        // TODO Return internal server error
+        // TODO Return internal parameter error
     }
 
     // get Ip Address of the client
     string clientIpAddress = inet_ntoa(clientAddress->sin_addr);
+
+    // TODO remove for Production
+    cout << "Client IP Address: " << clientIpAddress << endl;
 
     Response response;
 
@@ -126,6 +130,7 @@ void Server::startServer(int port, int topicTimeout)
     }
 
     // Code wont be executed
+    // TODO Handle end of Server on ctrl + c
 
     // //Join all the client threads
     // for (auto &threadObj : clientThreads)
@@ -149,37 +154,52 @@ Server::~Server()
     cout << "Stopping server" << endl;
 }
 
-// FIXME Only allows one Topic with the same name, muss be list of topics
 Response Server::handleSubsscribeRequest(string ipAddress, int port, string topicName)
 {
-    // Create the ClientConnection
-    ClientConnection clientConnection(ipAddress, port);
-    // Add to the ClientConnections
-    this->clientConnections.push_back(&clientConnection);
+    // Create Response object
+    Response response = Response(CommandIdentifiers::subscribe);
     // find the topic with the given name
     Topic *topicPtr = nullptr;
     for (Topic *topic : this->topics)
     {
-        if (*topic.getTopicName() == topicName)
+        if (topic->getTopicName() == topicName)
         {
-            topicPtr = &topic;
+            topicPtr = topic;
             break;
         }
     }
 
-    // Create Response object
-    Response response = Response(CommandIdentifiers::subscribe);
-
-    // if the topic does not exist throw a 
+    // if the topic does not exist return invalid parameter
     if (topicPtr == nullptr)
     {
         response.setStatusCode(Statuscode::invalidParameter);
         return response;
     }
 
+    // check if the ClientConnection already exists
+    ClientConnection *clientConnectionPtr = nullptr;
+    for (ClientConnection *clientConnection : this->clientConnections)
+    {
+        if (clientConnection->getAddress() == ipAddress && clientConnection->getPort() == port)
+        {
+            clientConnectionPtr = clientConnection;
+            break;
+        }
+    }
 
-    // Set response Arguments / Adde the client to the topic
-    if (topicPtr->subscribe(&clientConnection))
+    if (clientConnectionPtr != nullptr)
+    {
+        // Create the ClientConnection
+        ClientConnection clientConnection(ipAddress, port);
+        // Add to the ClientConnections
+        this->clientConnections.push_back(&clientConnection);
+        // Set the Pointer
+        clientConnectionPtr = &clientConnection;
+    }
+
+    // Set response Arguments / Add the client to the topic
+    // subscribe returns true if the client was added to the topic successfully and false if the client was already subscribed
+    if (topicPtr->subscribe(clientConnectionPtr))
     {
         // Set status code to success
         response.setStatusCode(Statuscode::success);
@@ -189,24 +209,23 @@ Response Server::handleSubsscribeRequest(string ipAddress, int port, string topi
         // Set status code to failed
         response.setStatusCode(Statuscode::failed);
     }
+    return response;
 }
 
-// FIXME Only allows one Topic with the same name, muss be list of topics
 Response Server::handleUnsubscribeRequest(string ipAddress, int port, string topicName)
 {
-    // find the client with the given ip and port and remove from the clientConnections
+    // find the client with the given ip and port
     ClientConnection *clientConnectionPtr = nullptr;
     for (ClientConnection *clientConnection : this->clientConnections)
     {
-        if (clientConnection->getIpAddress() == ipAddress && clientConnection->getPort() == port)
+        if (clientConnection->getAddress() == ipAddress && clientConnection->getPort() == port)
         {
             clientConnectionPtr = clientConnection;
-            // this->clientConnections.erase(clientConnection);
             break;
         }
     }
 
-    // remove the client from the topic
+    // get the topic with the given name
     Topic *topicPtr = nullptr;
     for (Topic *topic : this->topics)
     {
@@ -219,6 +238,13 @@ Response Server::handleUnsubscribeRequest(string ipAddress, int port, string top
     // Create Response object
     Response response = Response(CommandIdentifiers::unsubscribe);
 
+    // if the topic does not exist return invalid parameter
+    if (topicPtr == nullptr)
+    {
+        response.setStatusCode(Statuscode::invalidParameter);
+        return response;
+    }
+    
     if (topicPtr->unsubscribe(clientConnectionPtr))
     {
         // Set status code to success
@@ -226,25 +252,27 @@ Response Server::handleUnsubscribeRequest(string ipAddress, int port, string top
     }
     else
     {
-        // Set status code to internal failed
+        // Set status code to failed
         response.setStatusCode(Statuscode::failed);
+        return response;
     }
 
     // check if the client is subscribed to any other topic
     bool isSubscribedToOtherTopic = false;
     for (Topic *topic : this->topics)
     {
-        if (topic->hasClient(clientConnectionPtr))
+        if (topic->hasClient(clientConnectionPtr->getAddress(), clientConnectionPtr->getPort()))
         {
             isSubscribedToOtherTopic = true;
             break;
         }
     }
 
-    if(!isSubscribedToOtherTopic)
+    if (!isSubscribedToOtherTopic)
     {
         // if not, remove the client from the clientConnections
-        this->clientConnections.erase(clientConnectionPtr);
+        // TODO Test it
+        clientConnections.erase(std::remove(clientConnections.begin(), clientConnections.end(), clientConnectionPtr), clientConnections.end());
     }
 
     return response;
@@ -259,7 +287,7 @@ Response Server::handleListTopics()
     vector<string> topicNames;
     for (Topic *topic : this->topics)
     {
-        topicNames.push_back(topic.getTopicName());
+        topicNames.push_back(topic->getTopicName());
     }
 
     // Set response Arguments
@@ -287,9 +315,9 @@ Response Server::handleGetTopicStatus(string topicName)
     // Find the topic with the given name
     for (Topic *topic : this->topics)
     {
-        if (topic.getTopicName() == topicName)
+        if (topic->getTopicName() == topicName)
         {
-            topicPtr = &topic;
+            topicPtr = topic;
             break;
         }
     }
@@ -332,6 +360,42 @@ Response Server::handleGetTopicStatus(string topicName)
 
 Response Server::handlePublishRequest(string topicName, string message)
 {
-    // TODO
-    return Response();
+    // Create Response object
+    Response response = Response(CommandIdentifiers::publish);
+
+    // init pointer to topic
+    Topic *topicPtr = nullptr;
+
+    // Find the topic with the given name
+    for (Topic *topic : this->topics)
+    {
+        if (topic->getTopicName() == topicName)
+        {
+            topicPtr = topic;
+            break;
+        }
+    }
+
+    // Check if the topic was found
+    if (topicPtr == nullptr)
+    {
+        // Set status code to failed
+        response.setStatusCode(Statuscode::failed);
+        return response;
+    }
+
+    // Set the message
+    // Publishing is done by the Thread of the Server
+    if (topicPtr->setMessage(message))
+    {
+        // Set status code to success
+        response.setStatusCode(Statuscode::success);
+    }
+    else
+    {
+        // Set status code to failed
+        response.setStatusCode(Statuscode::failed);
+    }
+    return response;
+    
 }
