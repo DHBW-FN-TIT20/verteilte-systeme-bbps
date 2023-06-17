@@ -9,8 +9,11 @@
 #include <thread>
 #include <vector>
 #include <algorithm>
+#include <mutex>
 
 using namespace std;
+
+mutex mtx;
 
 void Server::handleApproachingClient(int clientSocket, struct sockaddr_in *clientAddress)
 {
@@ -85,7 +88,7 @@ void Server::handleApproachingClient(int clientSocket, struct sockaddr_in *clien
     close(clientSocket);
 }
 
-void Server::startServer(int port, int topicTimeout)
+void Server::startServer(int port)
 {
     int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (serverSocket < 0)
@@ -141,16 +144,42 @@ void Server::startServer(int port, int topicTimeout)
     // close(serverSocket);
 }
 
+void Server::checkTopicTimeouts()
+{
+    // For all Topics check if the timeout has been reached
+    while (true)
+    {
+        cout << "Checking for timed out topics" << endl;
+        mtx.lock();
+        for (Topic *topic : this->topics)
+        {
+            // if message timeout < current time
+            if (topic->getTimeoutTimestamp() + this->topicTimeout < time(nullptr))
+            {
+                // publish message
+                topic->publishMessage();
+                // update timeout timestamp
+                topic->setTimeoutTimestamp(time(nullptr) + this->topicTimeout);
+            }
+        }
+        mtx.unlock();
+        // Sleep for 1 second
+        sleep(1);
+    }
+}
+
 Server::Server(int port, int topicTimeout)
 {
     cout << "Starting server on port " << port << " with topic timeout of " << topicTimeout << " seconds." << endl;
-
+    this->topicTimeout = topicTimeout;
+    this->timeoutCheckerThread = thread(&Server::checkTopicTimeouts, this);
     // Start the Server in a while loop
-    startServer(port, topicTimeout);
+    startServer(port);
 }
 
 Server::~Server()
 {
+    this->timeoutCheckerThread.join();
     cout << "Stopping server" << endl;
 }
 

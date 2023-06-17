@@ -49,7 +49,8 @@ void Topic::publishMessage()
 bool Topic::setMessage(string message)
 {
     this->message = message;
-    this->messageTimestamp = time(NULL);
+    this->messageTimestamp = time(nullptr);
+    this->timeoutTimestamp = time(nullptr);
     return true;
 }
 
