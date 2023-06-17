@@ -4,6 +4,7 @@
 #include <ctime>
 #include <thread>
 #include <vector>
+#include <mutex>
 
 #include "topic.h"
 #include "clientconnection.h"
@@ -94,6 +95,7 @@ class Server {
         void logRequest(string request, string sourceAddress, int sourcePort);
 
     private:
+        mutex mtx;
         int port;
         int topicTimeout;
         vector<Topic*> topics;

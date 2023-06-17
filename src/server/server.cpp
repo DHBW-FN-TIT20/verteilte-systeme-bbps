@@ -9,11 +9,8 @@
 #include <thread>
 #include <vector>
 #include <algorithm>
-#include <mutex>
 
 using namespace std;
-
-mutex mtx;
 
 void Server::handleApproachingClient(int clientSocket, struct sockaddr_in *clientAddress)
 {
@@ -150,7 +147,7 @@ void Server::checkTopicTimeouts()
     while (true)
     {
         cout << "Checking for timed out topics" << endl;
-        mtx.lock();
+        lock_guard<mutex> lock(mtx);
         for (Topic *topic : this->topics)
         {
             // if message timeout < current time
@@ -162,7 +159,6 @@ void Server::checkTopicTimeouts()
                 topic->setTimeoutTimestamp(time(nullptr) + this->topicTimeout);
             }
         }
-        mtx.unlock();
         // Sleep for 1 second
         sleep(1);
     }
@@ -187,6 +183,8 @@ Response Server::handleSubsscribeRequest(string ipAddress, int port, string topi
 {
     // Create Response object
     Response response = Response(CommandIdentifiers::subscribe);
+    // lock the mutex
+    lock_guard<mutex> lock(mtx);
     // find the topic with the given name
     Topic *topicPtr = nullptr;
     for (Topic *topic : this->topics)
@@ -243,6 +241,8 @@ Response Server::handleSubsscribeRequest(string ipAddress, int port, string topi
 
 Response Server::handleUnsubscribeRequest(string ipAddress, int port, string topicName)
 {
+    // lock the mutex
+    lock_guard<mutex> lock(mtx);
     // find the client with the given ip and port
     ClientConnection *clientConnectionPtr = nullptr;
     for (ClientConnection *clientConnection : this->clientConnections)
@@ -303,7 +303,6 @@ Response Server::handleUnsubscribeRequest(string ipAddress, int port, string top
         // TODO Test it
         clientConnections.erase(remove(clientConnections.begin(), clientConnections.end(), clientConnectionPtr), clientConnections.end());
     }
-
     return response;
 }
 
@@ -311,6 +310,9 @@ Response Server::handleListTopics()
 {
     // Create Response object
     Response response = Response(CommandIdentifiers::listTopics);
+
+    // lock the mutex
+    lock_guard<mutex> lock(mtx);
 
     // Cast the Topics in vector of strings
     vector<string> topicNames;
@@ -340,6 +342,9 @@ Response Server::handleGetTopicStatus(string topicName)
 
     // init pointer to topic
     Topic *topicPtr = nullptr;
+
+    // lock the mutex
+    lock_guard<mutex> lock(mtx);
 
     // Find the topic with the given name
     for (Topic *topic : this->topics)
@@ -394,6 +399,9 @@ Response Server::handlePublishRequest(string topicName, string message)
 
     // init pointer to topic
     Topic *topicPtr = nullptr;
+
+    // lock the mutex
+    lock_guard<mutex> lock(mtx);
 
     // Find the topic with the given name
     for (Topic *topic : this->topics)
