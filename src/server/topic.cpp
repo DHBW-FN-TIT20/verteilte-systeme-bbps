@@ -24,6 +24,7 @@ bool Topic::hasClient(string address, int port)
             return true;
         }
     }
+    return false;
 }
 
 time_t Topic::getTimeoutTimestamp()
@@ -85,4 +86,10 @@ bool Topic::unsubscribe(ClientConnection *clientConnection)
 string Topic::getTopicName()
 {
     return this->topicName;
+}
+
+vector<ClientConnection *> Topic::getClientConnections()
+{
+    // Return the subscriberList
+    return this->subscriberList;
 }
