@@ -1,5 +1,6 @@
 #include "topic.h"
 #include <iostream>
+#include <algorithm>
 using namespace std;
 
 Topic::Topic(string name)
@@ -40,14 +41,15 @@ void Topic::publishMessage()
     // Send Message to all subscribers
     for (ClientConnection *clientConnection : this->subscriberList)
     {
-        clientConnection->SendMessage(this->message, this->messageTimestamp);
+        clientConnection->SendMessage(this->topicName, this->message, this->messageTimestamp);
     }
 }
 
-void Topic::setMessage(string message)
+bool Topic::setMessage(string message)
 {
     this->message = message;
     this->messageTimestamp = time(NULL);
+    return true;
 }
 
 time_t Topic::getMessageTimestamp()
@@ -58,7 +60,7 @@ time_t Topic::getMessageTimestamp()
 bool Topic::subscribe(ClientConnection *clientConnection)
 {
     // Check if clientConnection is already subscribes
-    if (this->hasClient(clientConnection))
+    if (this->hasClient(clientConnection->getAddress(), clientConnection->getPort()))
     {
         return false;
     }
@@ -71,9 +73,9 @@ bool Topic::unsubscribe(ClientConnection *clientConnection)
     // Remove the clientConnection from the subscriberList
     for (ClientConnection *clientConnection : this->subscriberList)
     {
-        if (clientConnection->getAddress() == address && clientConnection->getPort() == port)
+        if (clientConnection->getAddress() == clientConnection->getAddress() && clientConnection->getPort() == clientConnection->getPort())
         {
-            this->subscriberList.erase(clientConnection);
+            this->subscriberList.erase(remove(this->subscriberList.begin(), this->subscriberList.end(), clientConnection), this->subscriberList.end());
             return true;
         }
     }

@@ -62,7 +62,7 @@ class Topic {
          * 
          * @param message New message.
          */
-        void setMessage(string message);
+        bool setMessage(string message);
 
         /**
          * @brief Get the \p messageTimestamp value
