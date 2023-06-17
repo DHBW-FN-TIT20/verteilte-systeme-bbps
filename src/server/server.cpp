@@ -26,7 +26,7 @@ void Server::handleApproachingClient(int clientSocket, struct sockaddr_in *clien
     // Process the received data
     // TODO remove for Production
     string receivedData(buffer, bytesRead);
-    cout << "Received from client: " << receivedData << std::endl;
+    cout << "Received from client: " << receivedData << endl;
 
     // deserialize the received data
     // try catch to catch the exception if the string is not a valid json
@@ -90,7 +90,7 @@ void Server::startServer(int port, int topicTimeout)
     int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (serverSocket < 0)
     {
-        std::cerr << "Error creating socket" << std::endl;
+        cerr << "Error creating socket" << endl;
         return;
     }
 
@@ -100,18 +100,18 @@ void Server::startServer(int port, int topicTimeout)
     serverAddress.sin_addr.s_addr = INADDR_ANY;
     if (bind(serverSocket, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0)
     {
-        std::cerr << "Error binding socket" << std::endl;
+        cerr << "Error binding socket" << endl;
         return;
     }
 
     int backlog = 5; // Maximum number of pending connections
     if (listen(serverSocket, backlog) < 0)
     {
-        std::cerr << "Error listening for connections" << std::endl;
+        cerr << "Error listening for connections" << endl;
         return;
     }
 
-    std::vector<std::thread> clientThreads;
+    vector<thread> clientThreads;
 
     while (true)
     {
@@ -120,13 +120,13 @@ void Server::startServer(int port, int topicTimeout)
         int clientSocket = accept(serverSocket, (struct sockaddr *)&clientAddress, &clientAddressLength);
         if (clientSocket < 0)
         {
-            std::cerr << "Error accepting connection" << std::endl;
+            cerr << "Error accepting connection" << endl;
             continue;
         }
 
         // Create a new thread to handle the approaching client connection
-        std::thread threadObj(&Server::handleApproachingClient, this, clientSocket, &clientAddress);
-        clientThreads.push_back(std::move(threadObj));
+        thread threadObj(&Server::handleApproachingClient, this, clientSocket, &clientAddress);
+        clientThreads.push_back(move(threadObj));
     }
 
     // Code wont be executed
@@ -272,7 +272,7 @@ Response Server::handleUnsubscribeRequest(string ipAddress, int port, string top
     {
         // if not, remove the client from the clientConnections
         // TODO Test it
-        clientConnections.erase(std::remove(clientConnections.begin(), clientConnections.end(), clientConnectionPtr), clientConnections.end());
+        clientConnections.erase(remove(clientConnections.begin(), clientConnections.end(), clientConnectionPtr), clientConnections.end());
     }
 
     return response;
