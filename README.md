@@ -11,7 +11,11 @@ von Johannes Brandenburger, Lukas Braun, Phillip Patzelt, Henry Schuler und Lea 
   - [Client](#client)
   - [Server](#server)
 - [Technologies](#technologies)
-- [Description of System Architecture](#description-of-system-architecture)
+  - [Client and Server (C++)](#client-and-server-c)
+    - [JsonCpp](#jsoncpp)
+    - [spdlog](#spdlog)
+  - [User Tests (Python)](#user-tests-python)
+- [Description of System Architecture TODO:](#description-of-system-architecture-todo)
 - [Interface Description](#interface-description)
   - [Client request](#client-request)
   - [Server response](#server-response)
@@ -22,6 +26,8 @@ von Johannes Brandenburger, Lukas Braun, Phillip Patzelt, Henry Schuler und Lea 
   - [TODO:](#todo)
 - [Concurrency](#concurrency)
 - [Source Code Documentation](#source-code-documentation)
+  - [Error handling](#error-handling)
+  - [Doxygen](#doxygen)
 - [Testing](#testing)
 
 
@@ -84,12 +90,19 @@ SETTING | --topic-timeout | Inactivity timeout in seconds for all topics. If no 
 DEBUG | --debug | enable logging debug information
 
 # Technologies
-- C++ (Server and Client)
-    - JsonCpp: working with JSON structures
-    - spdlog: simple logging
-- Python (User Tests)
+## Client and Server (C++)
+### JsonCpp
+[JsonCpp](https://github.com/open-source-parsers/jsoncpp) is used to work with JSON structures in C++.
+This library is used to parse the request and response bodies for the communication between client and server.
 
-# Description of System Architecture
+### spdlog
+[Spdlog](https://github.com/gabime/spdlog) is a lightweight logging library for C++.
+This library is used to log all user information and errors to the console.
+Furthermore, with the help of the `--debug` argument, debug information can be displayed.
+
+## User Tests (Python)
+
+# Description of System Architecture TODO:
 - Description
 - Reason
 # Interface Description
@@ -159,5 +172,12 @@ GET_TOPIC_STATUS | topicName
 - Multithreading with Mutex
 
 # Source Code Documentation
+## Error handling
+There is no dedicated error handler.
+However, potential error sources that were discovered during development are handled.
+Thus, the program will not crash, but the error will be logged using the "error" identifier and the program will continue to run.
+
+## Doxygen
+
 
 # Testing
