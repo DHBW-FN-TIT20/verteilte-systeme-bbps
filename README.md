@@ -33,10 +33,38 @@ von Johannes Brandenburger, Lukas Braun, Phillip Patzelt, Henry Schuler und Lea 
 # Source Code Dokumentation
 
 # Testing
+- Zur Überprüfung der Funktionalität des Systems wurden User-Tests mithilfe von Python durchgeführt. 
+  - Hierbei werden die Ausgaben des Clients in separaten Dateien geschrieben und mit den erwarteten Ausgaben verglichen.
+    - Die Datei **subscribe_client_with_one_topic.txt** enthält die Ausgaben des Clients, wenn dieser sich nur bei einem Topic subscribed. Zusätzlich kann in dieser Datei der Heartbeat des Clients beobachtet werden. Der Subscribe wird  mit den folgenden Codezeilen durchgeführt:
+        ```
+        subscribe_client_process_with_one_topic = subprocess.Popen([client_path, "--subscribe", "ErstesTopic", "--server-port", "8080"], stdin=subprocess.PIPE, stdout=subscribe_client_with_one_topic, stderr=subprocess.STDOUT)
+        ```	
+    - Die Datei **subscribe_client_with_multiple_topics.txt** enthält die Ausgaben des Clients, wenn dieser sich bei mehreren Topics subscribed. Hierbei wird probiert sich auf das gleiche Topic mehrmals zu subscriben. Der erste Subscribe-Versuch sollte erfolgreich sein, die weiteren Versuche sollten fehlschlagen. Zusätzlich kann in dieser Datei ebenfalls der Heartbeat des Clients beobachtet werden. Der Subscribe wird mit den folgenden  Codezeilen durchgeführt:
+        ```
+        subscribe_client_process_with_two_topics = subprocess.Popen([client_path, "--subscribe", "ErstesTopic", "ErstesTopic", "--server-port", "8080"], stdin=subprocess.PIPE, stdout=subscribe_client_with_two_topics, stderr=subprocess.STDOUT)
+        ```	
+    - Die Datei **execute_commands_client_output_file.txt** enhtält die Ausgaben von mehreren Commands, die auf dem Client ausgeführt wurden. Hierbei wird das **publishen** bei vorhandenen und nicht vorhandenen Topics getestet. 
+    Zusätzlich wird das Ausführen des Commands **list-topics** getestet. Zuletzt wird der Command **get-topic-status** getestet. Hierbei wird der Status von vorhandenen und nicht vorhandenen Topics abgefragt. Die Commands werden mit den folgenden Codezeilen durchgeführt:
+        ```
+        # Commands to Test
+        client_commands = [
+            ["../../client.exe", "--publish", "ErstesTopic", "Message", "--server-port", "8080"],
+            ["../../client.exe", "--publish", "NichtExistierendesTopic", "Message", "--server-port", "8080"],
+            ["../../client.exe", "--list-topics", "--server-port", "8080"],
+            ["../../client.exe", "--get-topic-status", "ErstesTopic", "--server-port", "8080"],
+            ["../../client.exe", "--get-topic-status", "NichtExistierendesTopic", "--server-port", "8080"]
+        ]
 
+        for command in client_commands:
+            # Start client and redirect input/output to the log file
+            client_process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=execute_commands_client_output_file, stderr=subprocess.STDOUT)
+            # Execute command in client
+            client_process.communicate()
+            client_process.wait()
 
-
-
+            # Some Delay
+            time.sleep(5)
+        ```
 
 # OLD
 
