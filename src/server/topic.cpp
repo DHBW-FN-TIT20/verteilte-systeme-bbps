@@ -8,7 +8,7 @@ using namespace std;
 
 Topic::Topic(string name)
 {
-    cout << "Creating topic " << name << endl;
+    spdlog::debug("Creating topic {}", name);
     this->topicName = name;
     this->message = "";
     this->messageTimestamp = time(nullptr);
@@ -18,7 +18,6 @@ Topic::Topic(string name)
 
 Topic::~Topic()
 {
-    cout << "Destroying topic" << endl;
     spdlog::debug("Destroying topic {}", this->topicName);
 }
 

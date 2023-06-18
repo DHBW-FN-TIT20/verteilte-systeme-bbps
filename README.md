@@ -3,57 +3,56 @@ Abschlusstestat für die Vorlesung Verteilte Systeme and der DHBW Ravensburg im 
 von Johannes Brandenburger, Lukas Braun, Phillip Patzelt, Henry Schuler und Lea Silberzahn
 
 # Table of Contents
-- [Scope of Tasks](#Scope-of-Tasks)
-- [Technologies](#Instructions)
+- [Publisher / Subscriber System](#publisher--subscriber-system)
+- [Table of Contents](#table-of-contents)
+- [Scope of Tasks](#scope-of-tasks)
+- [Installation](#installation)
+- [Instructions](#instructions)
+  - [Client](#client)
+  - [Server](#server)
+- [Technologies](#technologies)
+- [Description of System Architecture](#description-of-system-architecture)
+- [Interface Description](#interface-description)
+  - [Client request](#client-request)
+  - [Server response](#server-response)
+    - [Default](#default)
+    - [LIST\_TOPIC](#list_topic)
+    - [GET\_TOPIC\_STATUS](#get_topic_status)
+  - [Server publish (message/heartbeat)](#server-publish-messageheartbeat)
+  - [TODO:](#todo)
+- [Concurrency](#concurrency)
+- [Source Code Documentation](#source-code-documentation)
+- [Testing](#testing)
+
 
 
 # Scope of Tasks
-<!-- können wir auch Brief overview oder Desription nennen -->
+> The specific requirements are described in the provided PDF file. <br>
+> Within this section, a brief overview of the requirements is given.
+- Create a publisher (server) / subscriber (client) system
+  - Publisher
+    - Manages topics and their subscribers
+    - Manages at least 32 topics
+    - Informs all subscribers about new messages
+      - Periodically sends a heartbeat (resend message) to all subscribers
+  - Subscriber
+    - Can: subscribe, unsubscribe, publish, list topics and get topic status
 # Installation
+This software has to be compiled under Linux (tested with ubuntu-22.04.1-desktop-amd64).
+
+1. Install git, make, g++, libjsoncpp-dev
+   ```shell
+   sudo apt-get install git make g++ libjsoncpp-dev
+   ```
+2. Clone the repository and compile client and server
+   ```shell
+   git clone https://github.com/DHBW-FN-TIT20/verteilte-systeme-bbpss.git
+   cd verteilte-systeme-bbpss/
+   make all
+   ```
+3. Execute the `client.exe` or `server.exe`
 # Instructions
-
-# Technologies
-- C++
-    - JsonCpp
-    - spdlog
-- Python (User Tests)
-
-
-
-# Description of System Architecture
-- Description
-- Reason
-# Interface Description
-- Protokolls, allowed parameter(area, type), Pre- and Post-Conditions, wrongdoing
-- TCP for the client prompts to the server
-- UDP for the Server publish
-# Concurrency
-- Multithreading with Mutex
-
-# Source Code Dokumentation
-
-# Testing
-
-
-
-
-
-# OLD
-
-## Start the Server
-A server is started with the following arguments:
-```
---port (optional)
-    Port to listen on
-    Default: 8080
---topic-timeout (optional in Seconds) [default 30]
-    Inactivity Timeout in seconds for all topics. If there are no new mesages over this time each subscriber gets a wakeup message.
-    Default: 30
-```
-
-There is a `--help` command to display all available arguments in the terminal as well.
-
-## Start the Client
+## Client
 To start the client, there are several arguments that can be passed.
 - Since the SETTING arguments have a default value, they are optional.
 - In order to be able to start the server you have to provide exactly **one** COMMAND.
@@ -71,8 +70,35 @@ COMMAND | --list-topics | list all existing topics
 COMMAND | --get-topic-status &lt;TOPIC1&gt; &lt;...&gt; &lt;TOPICn&gt; | get the status of (multiple) topics
 DEBUG | --debug | enable logging debug information
 
+> **Restriction**: When using the `--publish` command, the topic name and message combined cannot exceed 1700 characters.
 
-# JSON communication
+## Server
+A server is started with the following arguments:
+> Info: If the --help argument is used, the server will not start.
+> 
+type | argument | description | default
+--- | --- | --- | ---
+INFO | --help | display all available arguments
+SETTING | --port &lt;PORT&gt; | listening port for the client | 8080
+SETTING | --topic-timeout | Inactivity timeout in seconds for all topics. If no message is received in this period, the message is resent to each subscriber (heartbeat). | 30
+DEBUG | --debug | enable logging debug information
+
+# Technologies
+- C++ (Server and Client)
+    - JsonCpp: working with JSON structures
+    - spdlog: simple logging
+- Python (User Tests)
+
+# Description of System Architecture
+- Description
+- Reason
+# Interface Description
+- Requests and responses are sent using TCP and JSON bodies
+  - TCP assures that the request is received
+- Messages are published to the client using UDP and JSON bodies
+  - In order to reduce overhead, the message is published using UDP
+- JSON is used to it's simplicity and readability. It is also a common standard for API communication.
+
 ## Client request
 ```json
 {
@@ -86,7 +112,7 @@ DEBUG | --debug | enable logging debug information
 command | {{ ARGUMENT_NAME }}
 --- | ---
 SUBSCRIBE | topicName, clientPort
-UNSUBSCRIBE | topicName
+UNSUBSCRIBE | topicName, clientPort
 PUBLISH | topicName, message
 LIST_TOPICS | 
 GET_TOPIC_STATUS | topicName
@@ -118,7 +144,7 @@ GET_TOPIC_STATUS | topicName
 }
 ```
 
-## Server publish
+## Server publish (message/heartbeat)
 ```json
 {
     "topic": string,
@@ -126,3 +152,12 @@ GET_TOPIC_STATUS | topicName
     "message": string
 }
 ```
+
+## TODO:
+- Protocols, allowed parameter(area, type), Pre- and Post-Conditions, wrongdoing
+# Concurrency
+- Multithreading with Mutex
+
+# Source Code Documentation
+
+# Testing

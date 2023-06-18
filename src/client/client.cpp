@@ -1,4 +1,3 @@
-// TODO: Global: make sure that receive buffer is big enough for all messages
 #include <spdlog/spdlog.h>
 #include <sys/socket.h>
 #include <netinet/in.h>

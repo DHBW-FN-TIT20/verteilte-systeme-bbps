@@ -28,7 +28,6 @@ class Client {
          * 
          * @details
          * Starts a new thread (\p messageThread) that is listening for incoming messages on the defined port.
-         * Since the connection to the server is connectionless (UDP), errors due to serverAddress or serverPort will occur when sending a message.
          */
         Client(int port, string serverAddress, int serverPort);
 
@@ -37,6 +36,7 @@ class Client {
          * 
          * @details
          * Terminates the \p messageThread.
+         * Unsubscribes from all subscribed topics.
          */
         ~Client();
         
@@ -119,6 +119,7 @@ class Client {
          * @param command Object specifying the parameters to send.
          */
         void sendMessage(Command &command);
+        
         /**
          * @brief Prints the information of a received response to the console.
          * 
@@ -127,6 +128,7 @@ class Client {
          * @param senderPort Port of the sender (server).
          */
         void logResponse(const Response &response, const string &senderIp, const string &senderPort);
+        
         /**
          * @brief Prints a message to a topic with a timestamp to the console.
          *

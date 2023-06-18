@@ -1,12 +1,3 @@
-/**
- * @file response.h
- * @brief Defines a class that represents a server response to a client command.
- * @version 0.1
- * @date 2023-06-04
- * 
- * @copyright Copyright (c) 2023
- * 
- */
 #ifndef RESPONSE_H
 #define RESPONSE_H
 

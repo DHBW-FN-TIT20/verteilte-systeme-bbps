@@ -1,12 +1,3 @@
-/**
- * @file response.cpp
- * @brief
- * @version 0.1
- * @date 2023-06-04
- *
- * @copyright Copyright (c) 2023
- *
- */
 #include <jsoncpp/json/json.h>
 #include <spdlog/spdlog.h>
 

@@ -1,12 +1,3 @@
-/**
- * @file communicationParameters.h
- * @brief This file contains a Enum that describes the different parameter names for the JSON communication, as well as functions to convert Enum <-> string.
- * @version 0.1
- * @date 2023-06-05
- * 
- * @copyright Copyright (c) 2023
- * 
- */
 #ifndef COMMUNICATION_PARAMETERS_H
 #define COMMUNICATION_PARAMETERS_H
 

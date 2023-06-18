@@ -115,7 +115,6 @@ class Topic {
          * 
          */
         string topicName;
-
         time_t messageTimestamp;
         vector<ClientConnection*> subscriberList;
         time_t timeoutTimestamp;

@@ -60,7 +60,7 @@ class Server {
         void checkTopicTimeouts();
 
         /**
-         * @brief Handles a approaching client.
+         * @brief Handles an approaching client.
          * 
          * @param clientSocket client socket
          * @param clientAddress client address structure

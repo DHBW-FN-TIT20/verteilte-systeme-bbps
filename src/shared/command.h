@@ -1,12 +1,3 @@
-/**
- * @file command.h
- * @brief Defines a class that represents a command that can be sent from the client to the server.
- * @version 0.2
- * @date 2023-06-04
- * 
- * @copyright Copyright (c) 2023
- * 
- */
 #ifndef COMMAND_H
 #define COMMAND_H
 
