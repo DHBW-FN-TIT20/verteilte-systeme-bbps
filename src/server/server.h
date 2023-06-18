@@ -4,6 +4,7 @@
 #include <ctime>
 #include <thread>
 #include <vector>
+#include <mutex>
 
 #include "topic.h"
 #include "clientconnection.h"
@@ -74,7 +75,7 @@ class Server {
          * @note Requirements:
          * @note - Check the message for missing/invalid parameters.
          * @note - If a topic does not exits, a new one will be created.
-         */#include <vector>
+         */
         void handleRequest();
         
         /**
@@ -94,12 +95,19 @@ class Server {
         void logRequest(string request, string sourceAddress, int sourcePort);
 
     private:
+        mutex mtx;
         int port;
         int topicTimeout;
         vector<Topic*> topics;
         vector<ClientConnection*> clientConnections;
         thread timeoutCheckerThread;
-        void startServer(int port, int topicTimeout);
+        void startServer(int port);
+
+        /**
+         * @brief Checks for timed out topics and initiates send of last message, as well as resets the timeout.
+         * 
+         */
+        void checkTopicTimeouts();
 
         /**
          * @brief Handles a approaching client.

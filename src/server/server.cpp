@@ -85,7 +85,7 @@ void Server::handleApproachingClient(int clientSocket, struct sockaddr_in *clien
     close(clientSocket);
 }
 
-void Server::startServer(int port, int topicTimeout)
+void Server::startServer(int port)
 {
     int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (serverSocket < 0)
@@ -141,16 +141,41 @@ void Server::startServer(int port, int topicTimeout)
     // close(serverSocket);
 }
 
+void Server::checkTopicTimeouts()
+{
+    // For all Topics check if the timeout has been reached
+    while (true)
+    {
+        cout << "Checking for timed out topics" << endl;
+        lock_guard<mutex> lock(mtx);
+        for (Topic *topic : this->topics)
+        {
+            // if message timeout < current time
+            if (topic->getTimeoutTimestamp() + this->topicTimeout < time(nullptr))
+            {
+                // publish message
+                topic->publishMessage();
+                // update timeout timestamp
+                topic->setTimeoutTimestamp(time(nullptr) + this->topicTimeout);
+            }
+        }
+        // Sleep for 1 second
+        sleep(1);
+    }
+}
+
 Server::Server(int port, int topicTimeout)
 {
     cout << "Starting server on port " << port << " with topic timeout of " << topicTimeout << " seconds." << endl;
-
+    this->topicTimeout = topicTimeout;
+    this->timeoutCheckerThread = thread(&Server::checkTopicTimeouts, this);
     // Start the Server in a while loop
-    startServer(port, topicTimeout);
+    startServer(port);
 }
 
 Server::~Server()
 {
+    this->timeoutCheckerThread.join();
     cout << "Stopping server" << endl;
 }
 
@@ -158,6 +183,8 @@ Response Server::handleSubsscribeRequest(string ipAddress, int port, string topi
 {
     // Create Response object
     Response response = Response(CommandIdentifiers::subscribe);
+    // lock the mutex
+    lock_guard<mutex> lock(mtx);
     // find the topic with the given name
     Topic *topicPtr = nullptr;
     for (Topic *topic : this->topics)
@@ -214,6 +241,8 @@ Response Server::handleSubsscribeRequest(string ipAddress, int port, string topi
 
 Response Server::handleUnsubscribeRequest(string ipAddress, int port, string topicName)
 {
+    // lock the mutex
+    lock_guard<mutex> lock(mtx);
     // find the client with the given ip and port
     ClientConnection *clientConnectionPtr = nullptr;
     for (ClientConnection *clientConnection : this->clientConnections)
@@ -274,7 +303,6 @@ Response Server::handleUnsubscribeRequest(string ipAddress, int port, string top
         // TODO Test it
         clientConnections.erase(remove(clientConnections.begin(), clientConnections.end(), clientConnectionPtr), clientConnections.end());
     }
-
     return response;
 }
 
@@ -282,6 +310,9 @@ Response Server::handleListTopics()
 {
     // Create Response object
     Response response = Response(CommandIdentifiers::listTopics);
+
+    // lock the mutex
+    lock_guard<mutex> lock(mtx);
 
     // Cast the Topics in vector of strings
     vector<string> topicNames;
@@ -311,6 +342,9 @@ Response Server::handleGetTopicStatus(string topicName)
 
     // init pointer to topic
     Topic *topicPtr = nullptr;
+
+    // lock the mutex
+    lock_guard<mutex> lock(mtx);
 
     // Find the topic with the given name
     for (Topic *topic : this->topics)
@@ -365,6 +399,9 @@ Response Server::handlePublishRequest(string topicName, string message)
 
     // init pointer to topic
     Topic *topicPtr = nullptr;
+
+    // lock the mutex
+    lock_guard<mutex> lock(mtx);
 
     // Find the topic with the given name
     for (Topic *topic : this->topics)
