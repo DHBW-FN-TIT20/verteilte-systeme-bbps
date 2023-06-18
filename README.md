@@ -33,26 +33,25 @@ von Johannes Brandenburger, Lukas Braun, Phillip Patzelt, Henry Schuler und Lea 
 # Source Code Dokumentation
 
 # Testing
-- Zur Überprüfung der Funktionalität des Systems wurden User-Tests mithilfe von Python durchgeführt. 
-  - Hierbei werden die Ausgaben des Clients in separaten Dateien geschrieben und mit den erwarteten Ausgaben verglichen.
-    - Die Datei **subscribe_client_with_one_topic.txt** enthält die Ausgaben des Clients, wenn dieser sich nur bei einem Topic subscribed. Zusätzlich kann in dieser Datei der Heartbeat des Clients beobachtet werden. Der Subscribe wird  mit den folgenden Codezeilen durchgeführt:
+- User tests were conducted using Python to verify the functionality of the system.
+  - In these tests, the outputs of the clients are written to separate files and compared with the expected outputs.
+    - The file **subscribe_client_with_one_topic.txt** contains the outputs of the client when it subscribes to only one topic. Additionally, the heartbeat of the client can be observed in this file. The subscription is performed using the following lines of code:
         ```
-        subscribe_client_process_with_one_topic = subprocess.Popen([client_path, "--subscribe", "ErstesTopic", "--server-port", "8080"], stdin=subprocess.PIPE, stdout=subscribe_client_with_one_topic, stderr=subprocess.STDOUT)
+        subscribe_client_process_with_one_topic = subprocess.Popen([client_path, "--subscribe", "FirstTopic", "--server-port", "8080"], stdin=subprocess.PIPE, stdout=subscribe_client_with_one_topic, stderr=subprocess.STDOUT)
         ```	
-    - Die Datei **subscribe_client_with_multiple_topics.txt** enthält die Ausgaben des Clients, wenn dieser sich bei mehreren Topics subscribed. Hierbei wird probiert sich auf das gleiche Topic mehrmals zu subscriben. Der erste Subscribe-Versuch sollte erfolgreich sein, die weiteren Versuche sollten fehlschlagen. Zusätzlich kann in dieser Datei ebenfalls der Heartbeat des Clients beobachtet werden. Der Subscribe wird mit den folgenden  Codezeilen durchgeführt:
+    - The file **subscribe_client_with_multiple_topics.txt** contains the outputs of the client when it subscribes to multiple topics. In this case, an attempt is made to subscribe to the same topic multiple times. The first subscription attempt should be successful, while the subsequent attempts should fail. Additionally, the heartbeat of the client can also be observed in this file. The subscription is performed using the following lines of code:
         ```
-        subscribe_client_process_with_two_topics = subprocess.Popen([client_path, "--subscribe", "ErstesTopic", "ErstesTopic", "--server-port", "8080"], stdin=subprocess.PIPE, stdout=subscribe_client_with_two_topics, stderr=subprocess.STDOUT)
+        subscribe_client_process_with_two_topics = subprocess.Popen([client_path, "--subscribe", "FirstTopic", "SecondTopic", "--server-port", "8080"], stdin=subprocess.PIPE, stdout=subscribe_client_with_two_topics, stderr=subprocess.STDOUT)
         ```	
-    - Die Datei **execute_commands_client_output_file.txt** enhtält die Ausgaben von mehreren Commands, die auf dem Client ausgeführt wurden. Hierbei wird das **publishen** bei vorhandenen und nicht vorhandenen Topics getestet. 
-    Zusätzlich wird das Ausführen des Commands **list-topics** getestet. Zuletzt wird der Command **get-topic-status** getestet. Hierbei wird der Status von vorhandenen und nicht vorhandenen Topics abgefragt. Die Commands werden mit den folgenden Codezeilen durchgeführt:
+    - The file **execute_commands_client_output_file.txt** contains the outputs of multiple commands executed on the client. This tests the **publishing** on both existing and non-existing topics. Additionally, the execution of the **list-topics** command is tested. Finally, the **get-topic-status** command is tested, which retrieves the status of existing and non-existing topics. The commands are executed using the following lines of code:
         ```
         # Commands to Test
         client_commands = [
-            ["../../client.exe", "--publish", "ErstesTopic", "Message", "--server-port", "8080"],
-            ["../../client.exe", "--publish", "NichtExistierendesTopic", "Message", "--server-port", "8080"],
+            ["../../client.exe", "--publish", "FirstTopic", "Message", "--server-port", "8080"],
+            ["../../client.exe", "--publish", "NonExistingTopic", "Message", "--server-port", "8080"],
             ["../../client.exe", "--list-topics", "--server-port", "8080"],
-            ["../../client.exe", "--get-topic-status", "ErstesTopic", "--server-port", "8080"],
-            ["../../client.exe", "--get-topic-status", "NichtExistierendesTopic", "--server-port", "8080"]
+            ["../../client.exe", "--get-topic-status", "FirstTopic", "--server-port", "8080"],
+            ["../../client.exe", "--get-topic-status", "NonExistingTopic", "--server-port", "8080"]
         ]
 
         for command in client_commands:
