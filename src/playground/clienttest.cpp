@@ -43,6 +43,7 @@ int main() {
         "{"
             "\"command\": 0,"
             "\"arguments\": {"
+            "\"clientPort\": \"8080\","
             "\"topicName\": \"TEST\""
             "}"
         "}";

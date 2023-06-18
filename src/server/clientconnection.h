@@ -38,12 +38,26 @@ class ClientConnection
          * @details
          * The sent status code is always 0 (successful).
          */
-        void SendMessage(string message, time_t timestamp);
+        void SendMessage(string topicName, string message, time_t timestamp);
+
+        /**
+         * @brief Get the Address object
+         * 
+         * @return string IPv4 Address of the client
+         */
+        string getAddress();
+
+        /**
+         * @brief Get the Port object
+         * 
+         * @return int Port of the client
+         */
+        int getPort();
     
     private:
         string address;
         int port;
-        int socket;
+        // int socket;
 };
 
 #endif

@@ -53,6 +53,8 @@ PUBLISH | topicName, message
 LIST_TOPICS | 
 GET_TOPIC_STATUS | topicName
 
+**Note**: A client can be started with one ore more topics, but it will call a `SUBSCRIBE` Request for each Topic so its only one Topic per Request
+
 ## Server response
 ### Default
 ```json

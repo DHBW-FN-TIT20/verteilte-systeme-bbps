@@ -3,7 +3,7 @@
 
 #include <ctime>
 #include <thread>
-#include <list>
+#include <vector>
 
 #include "topic.h"
 #include "clientconnection.h"
@@ -31,7 +31,7 @@ class Server {
          * @brief Destroy the Server object
          * 
          * @details
-         * Terminates the \p timeoutCheckerThread thread.
+         * Terminates the \p timeoutSendMessageCheckerThread thread.
          * Removes all Topic and ClientConnection objects.
          */
         ~Server();
@@ -74,7 +74,7 @@ class Server {
          * @note Requirements:
          * @note - Check the message for missing/invalid parameters.
          * @note - If a topic does not exits, a new one will be created.
-         */
+         */#include <vector>
         void handleRequest();
         
         /**
@@ -96,15 +96,68 @@ class Server {
     private:
         int port;
         int topicTimeout;
-        list<Topic> topics;
-        list<ClientConnection> clientConnections;
+        vector<Topic*> topics;
+        vector<ClientConnection*> clientConnections;
         thread timeoutCheckerThread;
         void startServer(int port, int topicTimeout);
-        void handleApproachingClient(int clientSocket);
-        Response handleSubsscribeRequest(int socket, string topicName);
-        Response handleUnsubscribeRequest(int socket, string topicName);
+
+        /**
+         * @brief Handles a approaching client.
+         * 
+         * @param clientSocket client socket
+         * @param clientAddress client address structure
+         */
+        void handleApproachingClient(int clientSocket, struct sockaddr_in* clientAddress);
+
+        /**
+         * @brief Handles a subscribe request.
+         * Returns a Failed Status Code, if the topic does not exist.
+         * Returns a Invalid Parameters Status Code, if the Topic does not exist.
+         * Returns a Success Status Code, if the topic exists and the user is subscribed.
+         * @param ipAddress ip address of the client
+         * @param port port of the client to recieve Mesages
+         * @param topicName Topic to subscribe to
+         * @return Response 
+         */
+        Response handleSubsscribeRequest(string ipAddress, int port, string topicName);
+
+        /**
+         * @brief Handles a unsubscribe request. If the user is not longer subscribed to any topic, the clientConnection will be deleted.
+         * Returns a Failed Status Code, if the topic does not exist.
+         * Returns a Invalid Parameters Status Code, if the Topic does not exist.
+         * Returns a Success Status Code, if the topic exists and the user is unsubscribed.
+         * @param ipAddres ip address of the client
+         * @param port port of the client to recieve Mesages
+         * @param topicName Topic to unsubscribe from
+         * @return Response 
+         */
+        Response handleUnsubscribeRequest(string ipAddres, int port, string topicName);
+
+        /**
+         * @brief Handles a list topics request.
+         * Returns a Success Status Code and a list of all topics.
+         * @return Response 
+         */
         Response handleListTopics();
+
+        /**
+         * @brief Handles a get topic status request.
+         * Returns a Failed Status Code, if the topic does not exist.
+         * Returns a Success Status Code and the topic status(MessageTimestamp, Subscriber), if the topic exists.
+         * @param topicName Topic to get the status from
+         * @return Response 
+         */
         Response handleGetTopicStatus(string topicName);
+
+        /**
+         * @brief Handles a publish request.
+         * Returns a Failed Status Code, if the topic does not exist.
+         * Returns a Succes Status Code, if the topic exists and the message was published.
+         * @param topicName Topic to publish to
+         * @param message Message to publish
+         * @return Response 
+         */
+        Response handlePublishRequest(string topicName, string message);
 };
 
 #endif
