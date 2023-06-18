@@ -19,7 +19,7 @@
  */
 static map<CommandIdentifiers, vector<CommunicationParameters>> commandDictionary = {
     {CommandIdentifiers::subscribe, {CommunicationParameters::topicName, CommunicationParameters::clientPort}},
-    {CommandIdentifiers::unsubscribe, {CommunicationParameters::topicName}},
+    {CommandIdentifiers::unsubscribe, {CommunicationParameters::topicName, CommunicationParameters::clientPort}},
     {CommandIdentifiers::publish, {CommunicationParameters::topicName, CommunicationParameters::message}},
     {CommandIdentifiers::listTopics, {}},
     {CommandIdentifiers::getTopicStatus, {CommunicationParameters::topicName}}

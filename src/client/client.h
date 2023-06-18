@@ -6,6 +6,7 @@
 #include <thread>
 #include <netinet/in.h>
 #include <jsoncpp/json/json.h>
+#include <vector>
 
 #include "../shared/command.h"
 #include "../shared/statuscode.h"
@@ -110,6 +111,7 @@ class Client {
         // Atomic bool does not need a mutex
         atomic<bool> messageThreadRunning;
         thread messageThread;
+        vector<string> subscribedTopics;
 
         /**
          * @brief Sends a given command to the server.
