@@ -1,6 +1,4 @@
-#include "server.h"
-#include "../shared/command.h"
-#include "../shared/statuscode.h"
+#include <spdlog/spdlog.h>
 #include <iostream>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -10,63 +8,71 @@
 #include <vector>
 #include <algorithm>
 
+#include "server.h"
+#include "../shared/command.h"
+#include "../shared/statuscode.h"
+
+#define BUFFER_SIZE 2048
+
 using namespace std;
 
 void Server::handleApproachingClient(int clientSocket, struct sockaddr_in *clientAddress)
 {
-    char buffer[1024];
+    char buffer[BUFFER_SIZE];
 
     int bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
     if (bytesRead <= 0)
     {
-        cerr << "Error receiving data from client" << endl;
+        spdlog::error("Error receiving data from client");
         close(clientSocket);
         return;
     }
     // Process the received data
-    // TODO remove for Production
     string receivedData(buffer, bytesRead);
-    cout << "Received from client: " << receivedData << endl;
+    spdlog::debug("Received from client: {}", receivedData);
+
+    // Get the ip address and port of the client
+    struct sockaddr_in incomingAddr;
+    socklen_t incomingAddrLen = sizeof(incomingAddr);
+    getpeername(clientSocket, (struct sockaddr *)&incomingAddr, &incomingAddrLen);
+
+    string clientIpAddress = inet_ntoa(incomingAddr.sin_addr);
+    spdlog::info("Received request from {}:{} with content: {}", clientIpAddress, ntohs(incomingAddr.sin_port), receivedData);
 
     // deserialize the received data
     // try catch to catch the exception if the string is not a valid json
     Command command;
+    Response response;
     try
     {
         command = Command::deserialize(receivedData);
+
+        switch (command.commandIdentifier)
+        {
+        case CommandIdentifiers::subscribe:
+            response = this->handleSubscribeRequest(clientIpAddress, stoi(command.getCommandArgument(CommunicationParameters::clientPort)), command.getCommandArgument(CommunicationParameters::topicName));
+            break;
+        case CommandIdentifiers::unsubscribe:
+            response = this->handleUnsubscribeRequest(clientIpAddress, stoi(command.getCommandArgument(CommunicationParameters::clientPort)), command.getCommandArgument(CommunicationParameters::topicName));
+            break;
+        case CommandIdentifiers::listTopics:
+            response = this->handleListTopics();
+            break;
+        case CommandIdentifiers::getTopicStatus:
+            response = this->handleGetTopicStatus(command.getCommandArgument(CommunicationParameters::topicName));
+            break;
+        case CommandIdentifiers::publish:
+            response = this->handlePublishRequest(command.getCommandArgument(CommunicationParameters::topicName), command.getCommandArgument(CommunicationParameters::message));
+        default:
+            break;
+        }
     }
     catch (const exception &e)
     {
-        cerr << e.what() << endl;
-        // TODO Return internal parameter error
-    }
+        spdlog::error("The request is not from type JSON (Error: {})", e.what());
 
-    // get Ip Address of the client
-    string clientIpAddress = inet_ntoa(clientAddress->sin_addr);
-
-    // TODO remove for Production
-    cout << "Client IP Address: " << clientIpAddress << endl;
-
-    Response response;
-
-    switch (command.commandIdentifier)
-    {
-    case CommandIdentifiers::subscribe:
-        response = this->handleSubscribeRequest(clientIpAddress, stoi(command.getCommandArgument(CommunicationParameters::clientPort)), command.getCommandArgument(CommunicationParameters::topicName));
-        break;
-    case CommandIdentifiers::unsubscribe:
-        response = this->handleUnsubscribeRequest(clientIpAddress, stoi(command.getCommandArgument(CommunicationParameters::clientPort)), command.getCommandArgument(CommunicationParameters::topicName));
-        break;
-    case CommandIdentifiers::listTopics:
-        response = this->handleListTopics();
-        break;
-    case CommandIdentifiers::getTopicStatus:
-        response = this->handleGetTopicStatus(command.getCommandArgument(CommunicationParameters::topicName));
-        break;
-    case CommandIdentifiers::publish:
-        response = this->handlePublishRequest(command.getCommandArgument(CommunicationParameters::topicName), command.getCommandArgument(CommunicationParameters::message));
-    default:
-        break;
+        response = Response();
+        response.setStatusCode(Statuscode::internalError);
     }
 
     // serialize the response
@@ -76,7 +82,7 @@ void Server::handleApproachingClient(int clientSocket, struct sockaddr_in *clien
     int bytesSent = send(clientSocket, serializedResponse.c_str(), serializedResponse.length(), 0);
     if (bytesSent != serializedResponse.length())
     {
-        cerr << "Error sending data to client" << endl;
+        spdlog::error("Error sending data to client");
         close(clientSocket);
         return;
     }
@@ -90,7 +96,7 @@ void Server::startServer(int port)
     int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (serverSocket < 0)
     {
-        cerr << "Error creating socket" << endl;
+        spdlog::error("Error creating socket");
         return;
     }
 
@@ -100,14 +106,14 @@ void Server::startServer(int port)
     serverAddress.sin_addr.s_addr = INADDR_ANY;
     if (bind(serverSocket, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0)
     {
-        cerr << "Error binding socket" << endl;
+        spdlog::error("Error binding socket");
         return;
     }
 
     int backlog = 5; // Maximum number of pending connections
     if (listen(serverSocket, backlog) < 0)
     {
-        cerr << "Error listening for connections" << endl;
+        spdlog::error("Error listening for connections");
         return;
     }
 
@@ -120,7 +126,7 @@ void Server::startServer(int port)
         int clientSocket = accept(serverSocket, (struct sockaddr *)&clientAddress, &clientAddressLength);
         if (clientSocket < 0)
         {
-            cerr << "Error accepting connection" << endl;
+            spdlog::error("Error accepting connection");
             continue;
         }
 
@@ -128,17 +134,6 @@ void Server::startServer(int port)
         thread threadObj(&Server::handleApproachingClient, this, clientSocket, &clientAddress);
         clientThreads.push_back(move(threadObj));
     }
-
-    // Code wont be executed
-    // TODO Handle end of Server on ctrl + c
-
-    // //Join all the client threads
-    // for (auto &threadObj : clientThreads)
-    // {
-    //   threadObj.join();
-    // }
-
-    // close(serverSocket);
 }
 
 void Server::checkTopicTimeouts()
@@ -146,7 +141,6 @@ void Server::checkTopicTimeouts()
     // For all Topics check if the timeout has been reached
     while (true)
     {
-        // cout << "Checking for timed out topics" << endl;
         mtx.lock();
         for (Topic *topic : this->topics)
         {
@@ -167,7 +161,7 @@ void Server::checkTopicTimeouts()
 
 Server::Server(int port, int topicTimeout)
 {
-    cout << "Starting server on port " << port << " with topic timeout of " << topicTimeout << " seconds." << endl;
+    spdlog::info("Starting server on port {} with topic timeout of {} seconds.", port, topicTimeout);
     this->topicTimeout = topicTimeout;
     this->timeoutCheckerThread = thread(&Server::checkTopicTimeouts, this);
     this->clientConnections = {};
@@ -179,7 +173,7 @@ Server::Server(int port, int topicTimeout)
 Server::~Server()
 {
     this->timeoutCheckerThread.join();
-    cout << "Stopping server" << endl;
+    spdlog::info("Stopping server");
 }
 
 Response Server::handleSubscribeRequest(string ipAddress, int port, string topicName)
@@ -291,7 +285,6 @@ Response Server::handleUnsubscribeRequest(string ipAddress, int port, string top
     // if the topic has no more clients, delete the topic
     if ((topicPtr->getClientConnections()).size() == 0)
     {
-        // TODO Test it
         topics.erase(remove(topics.begin(), topics.end(), topicPtr), topics.end());
         delete topicPtr;
     }
@@ -310,7 +303,6 @@ Response Server::handleUnsubscribeRequest(string ipAddress, int port, string top
     if (!isSubscribedToOtherTopic)
     {
         // if not, remove the client from the clientConnections
-        // TODO Test it
         clientConnections.erase(remove(clientConnections.begin(), clientConnections.end(), clientConnectionPtr), clientConnections.end());
         delete clientConnectionPtr;
     }

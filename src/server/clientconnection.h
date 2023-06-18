@@ -6,6 +6,9 @@
 
 using namespace std;
 
+/**
+ * @brief Class for the ClientConnection.
+ */
 class ClientConnection
 {
     public:
@@ -40,14 +43,14 @@ class ClientConnection
         void SendMessage(string topicName, string message, time_t timestamp);
 
         /**
-         * @brief Get the Address object
+         * @brief Get the Address string
          * 
          * @return string IPv4 Address of the client
          */
         string getAddress();
 
         /**
-         * @brief Get the Port object
+         * @brief Get the Port number
          * 
          * @return int Port of the client
          */

@@ -9,6 +9,9 @@
 
 using namespace std;
 
+/**
+ * @brief Class for the Topic.
+ */
 class Topic {
     public:
         /**
@@ -115,7 +118,6 @@ class Topic {
          * 
          */
         string topicName;
-
         time_t messageTimestamp;
         vector<ClientConnection*> subscriberList;
         time_t timeoutTimestamp;

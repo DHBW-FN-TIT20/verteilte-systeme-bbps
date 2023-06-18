@@ -1,12 +1,3 @@
-/**
- * @file commands.cpp
- * @brief Implements a class that represents a command that can be sent from the client to the server.
- * @version 0.1
- * @date 2023-06-04
- *
- * @copyright Copyright (c) 2023
- *
- */
 #include <jsoncpp/json/json.h>
 #include <spdlog/spdlog.h>
 

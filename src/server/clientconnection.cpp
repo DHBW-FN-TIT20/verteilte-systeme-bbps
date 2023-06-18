@@ -12,7 +12,7 @@ using namespace std;
 
 ClientConnection::ClientConnection(string address, int port)
 {
-    cout << "Creating client connection on port " << port << " with server address " << address << endl;
+    spdlog::debug("Creating client connection on port {} with server address {}.", port, address);
     this->address = address;
     this->port = port;
 }
@@ -30,7 +30,7 @@ void ClientConnection::SendMessage(string topicName, string message, time_t time
     int clientSocket = socket(AF_INET, SOCK_DGRAM, 0);
     if (clientSocket < 0)
     {
-        cerr << "Error creating socket" << endl;
+        spdlog::error("Error creating socket");
         return;
     }
 

@@ -13,7 +13,7 @@
 using namespace std;
 
 /**
- * @brief Publisher
+ * @brief Main Class for the Server.
  */
 class Server {
     public:
@@ -60,7 +60,7 @@ class Server {
         void checkTopicTimeouts();
 
         /**
-         * @brief Handles a approaching client.
+         * @brief Handles an approaching client.
          * 
          * @param clientSocket client socket
          * @param clientAddress client address structure
@@ -80,7 +80,6 @@ class Server {
 
         /**
          * @brief Handles a unsubscribe request. If the user is not longer subscribed to any topic, the clientConnection will be deleted.
-         * Returns a Failed Status Code, if the topic does not exist.
          * Returns a Invalid Parameters Status Code, if the Topic does not exist.
          * Returns a Success Status Code, if the topic exists and the user is unsubscribed.
          * @param ipAddress ip address of the client

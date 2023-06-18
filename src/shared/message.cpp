@@ -1,12 +1,3 @@
-/**
- * @file message.cpp
- * @brief Implements a class that represents a message that can be sent from the server to the client.
- * @version 0.1
- * @date 2023-06-04
- * 
- * @copyright Copyright (c) 2023
- * 
- */
 #include <string>
 #include <jsoncpp/json/json.h>
 #include <spdlog/spdlog.h>

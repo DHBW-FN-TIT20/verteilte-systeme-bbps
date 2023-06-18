@@ -18,8 +18,8 @@ int getPortNumber(const string &portStr);
  * 
  * @note Example usage:
  * @code {.sh}
- *  subscriber_client --publisher-server <address> --register-topic TOPIC_NAME_1
- *  subscriber_client --publisher-server <address> --publish TOPIC_NAME_1 TOPIC_DATA_1
+ *  ./client.exe --server-address <address> --subscribe TOPIC_NAME_1
+ *  ./client.exe --server-address <address> --publish TOPIC_NAME_1 TOPIC_DATA_1
  * @endcode
  */
 int main(int argc, char** argv) {

@@ -1,12 +1,3 @@
-/**
- * @file message.h
- * @brief Defines a class that represents a message that can be sent from the server to the client.
- * @version 0.1
- * @date 2023-06-04
- * 
- * @copyright Copyright (c) 2023
- * 
- */
 #ifndef MESSAGE_H
 #define MESSAGE_H
 
@@ -16,7 +7,6 @@ using namespace std;
 
 /**
  * @brief Defines a class that represents a message that can be sent from the server to the client.
- * 
  */
 class Message {
     public:
