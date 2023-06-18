@@ -1,12 +1,3 @@
-/**
- * @file statuscode.h
- * @brief This file contains a Enum that describes the different status codes that can be sent from the server to the client.
- * @version 0.1
- * @date 2023-06-05
- * 
- * @copyright Copyright (c) 2023
- * 
- */
 #ifndef STATUSCODE_H
 #define STATUSCODE_H
 

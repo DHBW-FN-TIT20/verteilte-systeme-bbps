@@ -1,21 +1,25 @@
-#include "clientconnection.h"
-#include "../shared/response.h"
+#include <spdlog/spdlog.h>
 #include <iostream>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
 
+#include "clientconnection.h"
+#include "../shared/message.h"
+
 using namespace std;
 
 ClientConnection::ClientConnection(string address, int port)
 {
-    cout << "Creating client connection on port " << port << " with server address " << address << endl;
+    spdlog::debug("Creating client connection on port {} with server address {}.", port, address);
+    this->address = address;
+    this->port = port;
 }
 
 ClientConnection::~ClientConnection()
 {
-    cout << "Destroying client connection" << endl;
+    spdlog::debug("Destroying client connection {}:{}", this->address, this->port);
 }
 
 void ClientConnection::SendMessage(string topicName, string message, time_t timestamp)
@@ -23,10 +27,10 @@ void ClientConnection::SendMessage(string topicName, string message, time_t time
     // Send message to client
     // Connect to the client which has a socket listening on the port
 
-    int clientSocket = socket(AF_INET, SOCK_STREAM, 0);
+    int clientSocket = socket(AF_INET, SOCK_DGRAM, 0);
     if (clientSocket < 0)
     {
-        cerr << "Error creating socket" << endl;
+        spdlog::error("Error creating socket");
         return;
     }
 
@@ -35,42 +39,14 @@ void ClientConnection::SendMessage(string topicName, string message, time_t time
     serverAddress.sin_port = htons(this->port);
     serverAddress.sin_addr.s_addr = inet_addr(this->address.c_str());
 
-    int connectStatus = connect(clientSocket, (struct sockaddr *)&serverAddress, sizeof(serverAddress));
-    if (connectStatus < 0)
-    {
-        cerr << "Error connecting to the socket" << endl;
-        close(clientSocket);
-        return;
-    }
 
-    string serializedResonse;
     // Create the response
-    Response response = Response(CommandIdentifiers::publish);
-    if(response.setResponseArgument(CommunicationParameters::message, message) &&
-        response.setResponseArgument(CommunicationParameters::topicName, topicName) &&
-        response.setResponseArgument(CommunicationParameters::messageTimestamp, to_string(timestamp)))
-    {
-        // Serialize the response
-        serializedResonse = response.serialize();
-    }
-    else
-    {
-        // Error creating the response
-        cerr << "Error creating the response" << endl;
-        close(clientSocket);
-        return;
-    }
-    
-    // Send the response
-    int sendStatus = send(clientSocket, serializedResonse.c_str(), serializedResonse.length(), 0);
-    if (sendStatus < 0)
-    {
-        cerr << "Error sending data" << endl;
-        close(clientSocket);
-    }
+    Message messageObj = Message(topicName, timestamp, message);
+    string serializedMessage = messageObj.serialize();
 
-    // Close the socket
-    close(clientSocket);
+
+    // Send the response
+    sendto(clientSocket, (const char *)serializedMessage.c_str(), serializedMessage.length(), 0, (struct sockaddr *)&serverAddress, sizeof(serverAddress));
 
     return;
 }

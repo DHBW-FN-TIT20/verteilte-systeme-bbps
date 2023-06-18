@@ -1,17 +1,24 @@
-#include "topic.h"
+#include <spdlog/spdlog.h>
 #include <iostream>
 #include <algorithm>
+
+#include "topic.h"
+
 using namespace std;
 
 Topic::Topic(string name)
 {
-    cout << "Creating topic " << name << endl;
+    spdlog::debug("Creating topic {}", name);
     this->topicName = name;
+    this->message = "";
+    this->messageTimestamp = time(nullptr);
+    this->subscriberList = {};
+    this->timeoutTimestamp = time(nullptr);
 }
 
 Topic::~Topic()
 {
-    cout << "Destroying topic" << endl;
+    spdlog::debug("Destroying topic {}", this->topicName);
 }
 
 bool Topic::hasClient(string address, int port)
@@ -29,7 +36,7 @@ bool Topic::hasClient(string address, int port)
 
 time_t Topic::getTimeoutTimestamp()
 {
-    return time_t();
+    return this->timeoutTimestamp;
 }
 
 void Topic::setTimeoutTimestamp(time_t timestamp)
@@ -39,6 +46,11 @@ void Topic::setTimeoutTimestamp(time_t timestamp)
 
 void Topic::publishMessage()
 {
+    // check if there is a message
+    if (this->message == "")
+    {
+        return;
+    }
     // Send Message to all subscribers
     for (ClientConnection *clientConnection : this->subscriberList)
     {
@@ -56,7 +68,7 @@ bool Topic::setMessage(string message)
 
 time_t Topic::getMessageTimestamp()
 {
-    return time_t();
+    return this->messageTimestamp;
 }
 
 bool Topic::subscribe(ClientConnection *clientConnection)

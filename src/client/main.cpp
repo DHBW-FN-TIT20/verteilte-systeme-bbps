@@ -18,15 +18,15 @@ int getPortNumber(const string &portStr);
  * 
  * @note Example usage:
  * @code {.sh}
- *  subscriber_client --publisher-server <address> --register-topic TOPIC_NAME_1
- *  subscriber_client --publisher-server <address> --publish TOPIC_NAME_1 TOPIC_DATA_1
+ *  ./client.exe --server-address <address> --subscribe TOPIC_NAME_1
+ *  ./client.exe --server-address <address> --publish TOPIC_NAME_1 TOPIC_DATA_1
  * @endcode
  */
 int main(int argc, char** argv) {
-    // spdlog::set_level(spdlog::level::debug);
-
     spdlog::info("Initializing client...");
     spdlog::debug("Parsing CLI arguments...");
+    // Only if a subscribe is provided, the client has to stay alive after all commands are executed
+    bool hasSubscribeCommand = false;
 
     int port = 0;
     string serverAddress = "127.0.0.1";
@@ -84,8 +84,9 @@ int main(int argc, char** argv) {
             printUsageInformation();
             spdlog::info("Shutting down...");
             return 0;
-        }
-        else
+        } else if (arg == "--debug") {
+            spdlog::set_level(spdlog::level::debug);
+        } else
         {
             // Argument is a command or an argument for a command is missing
             // One client can only perform one kind of command therefore the first command defines the command type
@@ -100,6 +101,8 @@ int main(int argc, char** argv) {
                     arguments.push_back(topicName);
                 
                     spdlog::debug("-> Subscribing to topic: {}", topicName);
+
+                    hasSubscribeCommand = true;
 
                     i += 1;
                 }
@@ -168,8 +171,10 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    cout << "Press ENTER key to exit..." << endl;
-    cin.get();
+    if (hasSubscribeCommand) {
+        spdlog::info("Press ENTER key to exit...");
+        cin.get();
+    }
 
     spdlog::info("Shutting down...");
     delete client;
@@ -200,6 +205,9 @@ void printUsageInformation() {
     cout << "    " <<"    " <<"List all existing topics" << endl;
     cout << "    " <<"--get-topic-status <TOPIC1> <...> <TOPICn>: " << endl;
     cout << "    " <<"    " <<"Get the status of (multiple) topics" << endl;
+    cout << endl << "Debug:" << endl;
+    cout << "    " <<"--debug: " << endl;
+    cout << "    " <<"    " <<"Enable logging debug information" << endl;
     cout << endl;
 }
 

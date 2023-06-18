@@ -1,0 +1,39 @@
+# Doxyfile configuration file
+
+# Project name and version
+PROJECT_NAME           = "Publisher / Subscriber System, Testat Verteilte Systeme"
+PROJECT_VERSION        = "1.0"
+PROJECT_BRIEF          = "Abschlusstestat für die Vorlesung Verteilte Systeme an der DHBW Ravensburg"
+
+# Output directory
+OUTPUT_DIRECTORY       = ./doc
+
+# List of input files or directories to be processed
+INPUT                  = ./src/server ./src/client ./src/shared
+
+# File patterns to exclude from processing
+EXCLUDE                = ./src/playrgound
+
+# Enable support for C++ code
+ENABLED_SECTIONS       = "EXAMPLES"
+EXTRACT_ALL            = YES
+SOURCE_BROWSER         = YES
+REFERENCED_BY_RELATION = YES
+REFERENCES_RELATION    = YES
+
+# Generate documentation for undocumented entities
+EXTRACT_PRIVATE        = YES
+EXTRACT_STATIC         = YES
+
+# Include all members (including private and protected) in the documentation
+EXTRACT_ALL            = YES
+
+# Specify file patterns to filter the files to be processed
+FILE_PATTERNS          = *.h *.cpp
+
+# Enable automatic generation of collaboration diagrams
+HAVE_DOT               = YES
+CLASS_DIAGRAMS         = YES
+
+# Additional configuration options...
+

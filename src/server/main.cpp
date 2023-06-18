@@ -1,3 +1,4 @@
+#include <spdlog/spdlog.h>
 #include <iostream>
 
 #include "server.h"
@@ -5,7 +6,7 @@
 using namespace std;
 
 void printUsageInformation() {
-    cout << endl << "Commandline Tool to start the Publisher Server" << endl;
+    cout << endl << "Commandline Tool to start the publisher server" << endl;
     cout << endl << "Options:" << endl;
     cout << "    " <<"--help: " << endl;
     cout << "    " <<"    " <<"Print this help message" << endl;
@@ -15,6 +16,9 @@ void printUsageInformation() {
     cout << "    " <<"--topic-timeout: " << endl;
     cout << "    " <<"    " <<"Timeout in seconds for all topics" << endl;
     cout << "    " <<"    " <<"Default: 30" << endl;
+    cout << endl << "Debug:" << endl;
+    cout << "    " <<"--debug: " << endl;
+    cout << "    " <<"    " <<"Enable logging debug information" << endl;
     cout << endl;
 }
 
@@ -53,13 +57,13 @@ int main(int argc, char* argv[]) {
                 }
                 catch(const exception& e)
                 {
-                    cerr << "--port musst be a number." << endl;
+                    spdlog::error("--port musst be a number.");
                     // End the program with an error
                     return 1;
                 }
                 //check if port is in range
                 if (port < 0 || port > 65535) {
-                    cerr << "--port musst be in range 0-65535." << endl;
+                    spdlog::error("--port musst be in range 0-65535.");
                     // End the program with an error
                     return 1;
                 }
@@ -75,15 +79,16 @@ int main(int argc, char* argv[]) {
                 }
                 catch(const exception& e)
                 {
-                    cerr << "--topic-timeout musst be a number." << endl;
+                    spdlog::error("--topic-timeout musst be a number.");
                     // End the program with an error
                     return 1;
                 }
                 i++;
-            }
-            else {
+            } else if (arg == "--debug") {
+                spdlog::set_level(spdlog::level::debug);
+            } else {
                 // Invalid argument
-                cerr << "Invalid arguments: " << endl;
+                spdlog::error("Invalid arguments: ");
                 // Print usage information
                 printUsageInformation();
                 // End the program with an error
@@ -93,8 +98,8 @@ int main(int argc, char* argv[]) {
     } 
     else {
         // No arguments provided
-        cout << "No arguments provided. Use --help to see the available Options" << endl;
-        // Print usage informatio
+        spdlog::error("No arguments provided. Use --help to see the available Options");
+        // Print usage information
     }
     // Create a new server object
     Server server(port, topicTimeout);

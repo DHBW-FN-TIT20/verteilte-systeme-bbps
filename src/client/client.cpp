@@ -1,4 +1,3 @@
-// TODO: Global: make sure that receive buffer is big enough for all messages
 #include <spdlog/spdlog.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -29,34 +28,19 @@ Client::Client(int port, string serverAddress, int serverPort) {
     this->serverAddress = serverAddress;
     this->serverPort = serverPort;
 
-    // 
-    // Creating a socket for UDP communication with the server 
-    // 
-    spdlog::debug("Creating server connection...");
+    this->subscribedTopics = {};
 
-    // Creating socket file descriptor
-    if ( (serverSocket = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) {
-        spdlog::error("Server socket creation failed");
-        throw runtime_error("Server socket creation failed");
-    }
-   
+    // Fill server information
+
     memset(&serverAddr, 0, sizeof(serverAddr));
-       
-    // Filling server information
+
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_port = htons(serverPort);
     serverAddr.sin_addr.s_addr = inet_addr(serverAddress.c_str());
 
-    // Setting a timeout for the response from the server.
-    struct timeval tvServer;
-    tvServer.tv_sec = SERVER_RESPONSE_TIMEOUT;
-    tvServer.tv_usec = 0;
-    setsockopt(serverSocket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tvServer, sizeof tvServer);
-
-    spdlog::debug("Server connection created.");
 
     // 
-    // Creating a socket for receiving messages from the server and starting the message thread
+    // Creating a socket (UDP) for receiving messages from the server and starting the message thread
     // 
 
     spdlog::debug("Creating message socket...");
@@ -98,16 +82,22 @@ Client::Client(int port, string serverAddress, int serverPort) {
 Client::~Client() {
     spdlog::debug("Terminating client...");
 
+    spdlog::debug("Unsubscribe from all topics...");
+    while (this->subscribedTopics.size() > 0) {
+        spdlog::debug("Unsubscribing from topic: {}", this->subscribedTopics.front());
+        unsubscribe(this->subscribedTopics.front());
+    }
+    spdlog::debug("Unsubscribed from all topics.");
+
     spdlog::debug("Terminating message thread...");
-    // TODO: Aktuell wird der Thread erst beendet nachdem eine neue Nachricht gekommen ist da er sonst im recv festhängt -> eventuell doch einfach killen.
     this->messageThreadRunning = false;
     messageThread.join();
     spdlog::debug("Client terminated.");
 }
 
 void Client::subscribeTopic(string topicName) {
-    spdlog::debug("--------------------");
-    spdlog::debug("Subscribing to topic: {}", topicName);
+    spdlog::info("--------------------");
+    spdlog::info("Subscribing to topic: {}", topicName);
 
     Command subscribe(CommandIdentifiers::subscribe);
 
@@ -115,26 +105,31 @@ void Client::subscribeTopic(string topicName) {
     subscribe.setCommandArgument(CommunicationParameters::clientPort, to_string(this->port));
 
     sendMessage(subscribe);
+
+    this->subscribedTopics.push_back(topicName);
     
-    spdlog::debug("--------------------");
+    spdlog::info("--------------------");
 }
 
 void Client::unsubscribe(string topicName) {
-    spdlog::debug("--------------------");
-    spdlog::debug("Unsubscribing from topic: {}", topicName);
+    spdlog::info("--------------------");
+    spdlog::info("Unsubscribing from topic: {}", topicName);
 
     Command unsubscribe(CommandIdentifiers::unsubscribe);
 
     unsubscribe.setCommandArgument(CommunicationParameters::topicName, topicName);
+    unsubscribe.setCommandArgument(CommunicationParameters::clientPort, to_string(this->port));
 
     sendMessage(unsubscribe);
 
-    spdlog::debug("--------------------");
+    this->subscribedTopics.erase(remove(this->subscribedTopics.begin(), this->subscribedTopics.end(), topicName), this->subscribedTopics.end());
+
+    spdlog::info("--------------------");
 }
 
 void Client::publishTopic(string topicName, string message) {
-    spdlog::debug("--------------------");
-    spdlog::debug("Publishing message: {} to topic: {}", message, topicName);
+    spdlog::info("--------------------");
+    spdlog::info("Publishing message: {} to topic: {}", message, topicName);
 
     Command publish = Command(CommandIdentifiers::publish);
 
@@ -143,23 +138,23 @@ void Client::publishTopic(string topicName, string message) {
 
     sendMessage(publish);
 
-    spdlog::debug("--------------------");
+    spdlog::info("--------------------");
 }
 
 void Client::listTopics() {
-    spdlog::debug("--------------------");
-    spdlog::debug("Listing topics...");
+    spdlog::info("--------------------");
+    spdlog::info("Listing topics...");
 
     Command listTopics = Command(CommandIdentifiers::listTopics);
 
     sendMessage(listTopics);
 
-    spdlog::debug("--------------------");
+    spdlog::info("--------------------");
 }
 
 void Client::getTopicStatus(string topicName) {
-    spdlog::debug("--------------------");
-    spdlog::debug("Getting status of topic: {}", topicName);
+    spdlog::info("--------------------");
+    spdlog::info("Getting status of topic: {}", topicName);
 
     Command getTopicStatus = Command(CommandIdentifiers::getTopicStatus);
 
@@ -167,7 +162,7 @@ void Client::getTopicStatus(string topicName) {
 
     sendMessage(getTopicStatus);
     
-    spdlog::debug("--------------------");
+    spdlog::info("--------------------");
 }
 
 void Client::handleMessages() {
@@ -184,6 +179,7 @@ void Client::handleMessages() {
             spdlog::debug("No message received within timeout.");
         } else {
             spdlog::info("Received message from {}:{}", inet_ntoa(incomingAddr.sin_addr), ntohs(incomingAddr.sin_port));
+            spdlog::debug("Received message: {}", clientMessage);
 
             try {
                 Message message = Message::deserialize(clientMessage);
@@ -203,16 +199,43 @@ void Client::printMessage(Message message) {
     const time_t timestamp = message.getMessageTimestamp();
     strftime(formattedTimestamp, sizeof(formattedTimestamp), "%d.%m.%Y %H:%M::%S", localtime(&timestamp));
 
-    spdlog::info("Message received:\nTopic: {}\nTimestamp: {}\nMessage: {}", message.getTopic(), formattedTimestamp, message.getMessage());
+    spdlog::info("Topic: {} | Message-Timestamp: {} | Message: {}", message.getTopic(), formattedTimestamp, message.getMessage());
 }
 
 void Client::sendMessage(Command &command) {
+    // 
+    // Creating a socket for TCP communication with the server 
+    // 
+    spdlog::debug("Creating server connection...");
+
+    // Creating socket file descriptor
+    if ( (serverSocket = socket(AF_INET, SOCK_STREAM, 0)) < 0 ) {
+        spdlog::error("Server socket creation failed");
+        throw runtime_error("Server socket creation failed");
+    }
+
+    // Setting a timeout for the response from the server.
+    struct timeval tvServer;
+    tvServer.tv_sec = SERVER_RESPONSE_TIMEOUT;
+    tvServer.tv_usec = 0;
+    setsockopt(serverSocket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tvServer, sizeof tvServer);
+
+    spdlog::debug("Server connection created.");
+
     string message = command.serialize();
 
     // send message to server
-    spdlog::info("Sending message: {}", message);
-    // TODO: Check if the complete message is sent
-    sendto(serverSocket, (const char *)message.c_str(), strlen(message.c_str()), MSG_CONFIRM, (const struct sockaddr *)&serverAddr, sizeof(serverAddr));
+    spdlog::debug("Sending message: {}", message);
+    // Connect to the TCP port of the Server
+    if (connect(serverSocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) < 0) {
+        spdlog::error("Error connecting to server");
+        return;
+    }
+    
+    if (send(serverSocket, (const char *)message.c_str(), strlen(message.c_str()), 0) < 0) {
+        spdlog::error("Error sending data to server");
+        return;
+    }
 
     // prepare response buffer
     char responseJson[BUFFER_SIZE];
@@ -221,11 +244,12 @@ void Client::sendMessage(Command &command) {
     socklen_t incomingAddrLen = sizeof(incomingAddr);
 
     // receive responseJson from server
-    if (recvfrom(serverSocket, responseJson, sizeof(responseJson), 0, (struct sockaddr*)&incomingAddr, &incomingAddrLen) < 0) {
+    if (recv(serverSocket, responseJson, sizeof(responseJson), 0) < 0) {
         spdlog::error("No response from the server within 30 seconds.");
     } else {
-        spdlog::info("Received message from {}:{}", inet_ntoa(incomingAddr.sin_addr), ntohs(incomingAddr.sin_port));
-
+        getpeername(serverSocket, (struct sockaddr *)&incomingAddr, &incomingAddrLen);
+        spdlog::debug("Received message from {}:{}", inet_ntoa(incomingAddr.sin_addr), ntohs(incomingAddr.sin_port));
+        spdlog::debug("Received message: {}", responseJson);
         // parse response
         try {
             Response response = Response::deserialize(command.commandIdentifier, responseJson);
@@ -242,11 +266,9 @@ void Client::logResponse(const Response &response, const string &senderIp, const
     //  - Topics: <topic1>, <topic2>, <topic3>
     //  - Message Timestamp: <timestamp>, Subscribers: <subscriber1>, <subscriber2>, <subscriber3>
 
-    spdlog::debug("Logging response...");
-
     string logString = "";
     // Sender Info
-    logString += "Sender: " + senderIp + ":" + senderPort + "\n";
+    logString += "Received response from: " + senderIp + ":" + senderPort + "\n";
 
     // Status
     logString += "Status: ";
@@ -273,24 +295,28 @@ void Client::logResponse(const Response &response, const string &senderIp, const
             break;
     }
 
-    logString += "\n";
+    if (response.getStatusCode() != Statuscode::success) {
+        spdlog::error(logString);
+        spdlog::debug("Response logged with error.");
+        return;
+    }
 
     // Response Arguments
     vector<CommunicationParameters> parameters = response.getAvailableArguments();
 
     for (CommunicationParameters parameter : parameters) {
+        spdlog::debug("Logging parameter: {} - {}", communicationParameterToStringDictionary[parameter], response.getResponseArgument(parameter));
         switch (parameter) {
         case CommunicationParameters::topics:
             {
                 vector<string> topics = arrayStringToVectorString(response.getResponseArgument(parameter));
-                logString += "Topics: ";
+                logString += "\nTopics: ";
                 for (string topic : topics) {
                     logString += topic;
                     if (topic != topics.back()) {
                         logString += ", ";
                     }
                 }
-                logString += "\n";
                 break;
             }
         case CommunicationParameters::messageTimestamp:
@@ -299,24 +325,23 @@ void Client::logResponse(const Response &response, const string &senderIp, const
                 char formattedTimestamp[21];
                 strftime(formattedTimestamp, sizeof(formattedTimestamp), "%d.%m.%Y %H:%M::%S", localtime(&timestamp));
 
-                logString += "Message Timestamp: " + string(formattedTimestamp) +"\n";
+                logString += "\nMessage-Timestamp: " + string(formattedTimestamp);
                 break;
             }
         case CommunicationParameters::subscribers:
             {
                 vector<string> subscribers = arrayStringToVectorString(response.getResponseArgument(parameter));
-                logString += "Subscribers: ";
+                logString += "\nSubscribers: ";
                 for (string subscriber : subscribers) {
                     logString += subscriber;
                     if (subscriber != subscribers.back()) {
                         logString += ", ";
                     }
                 }
-                logString += "\n";
                 break;
             }
         default:
-            logString += communicationParameterToStringDictionary[parameter] + ": " + response.getResponseArgument(parameter) + "\n";
+            logString += "\n" + communicationParameterToStringDictionary[parameter] + ": " + response.getResponseArgument(parameter);
             break;
         }
     }
