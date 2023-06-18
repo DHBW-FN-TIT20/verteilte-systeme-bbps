@@ -1,0 +1,19 @@
+[2023-06-18 20:14:16.292] [info] Initializing client...
+[2023-06-18 20:14:16.298] [info] Successfully bound message socket to 127.0.0.1:48968.
+[2023-06-18 20:14:16.298] [info] Successfully started client.
+[2023-06-18 20:14:16.298] [info] --------------------
+[2023-06-18 20:14:16.298] [info] Subscribing to topic: ErstesTopic
+[2023-06-18 20:14:16.298] [info] Received response from: 127.0.0.1:8080
+Status: Success
+[2023-06-18 20:14:16.298] [info] --------------------
+[2023-06-18 20:14:16.298] [info] Press ENTER key to exit...
+[2023-06-18 20:14:21.481] [info] Received message from 127.0.0.1:35374
+[2023-06-18 20:14:21.481] [info] Topic: ErstesTopic | Message-Timestamp: 18.06.2023 20:14::21 | Message: Message
+[2023-06-18 20:14:51.456] [info] Shutting down...
+[2023-06-18 20:14:51.456] [info] --------------------
+[2023-06-18 20:14:51.456] [info] Unsubscribing from topic: ErstesTopic
+[2023-06-18 20:14:51.458] [info] Received response from: 127.0.0.1:8080
+Status: Success
+[2023-06-18 20:14:51.462] [info] --------------------
+[2023-06-18 20:14:51.584] [info] Received message from 127.0.0.1:32905
+[2023-06-18 20:14:51.584] [info] Topic: ErstesTopic | Message-Timestamp: 18.06.2023 20:14::21 | Message: Message
