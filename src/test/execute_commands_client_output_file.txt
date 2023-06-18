@@ -1,0 +1,48 @@
+[2023-06-18 20:14:21.294] [info] Initializing client...
+[2023-06-18 20:14:21.295] [info] Successfully bound message socket to 127.0.0.1:33401.
+[2023-06-18 20:14:21.295] [info] Successfully started client.
+[2023-06-18 20:14:21.295] [info] --------------------
+[2023-06-18 20:14:21.295] [info] Publishing message: Message to topic: ErstesTopic
+[2023-06-18 20:14:21.295] [info] Received response from: 127.0.0.1:8080
+Status: Success
+[2023-06-18 20:14:21.295] [info] --------------------
+[2023-06-18 20:14:21.295] [info] Shutting down...
+[2023-06-18 20:14:26.310] [info] Initializing client...
+[2023-06-18 20:14:26.320] [info] Successfully bound message socket to 127.0.0.1:56169.
+[2023-06-18 20:14:26.320] [info] Successfully started client.
+[2023-06-18 20:14:26.320] [info] --------------------
+[2023-06-18 20:14:26.320] [info] Publishing message: Message to topic: NichtExistierendesTopic
+[2023-06-18 20:14:26.325] [error] Received response from: 127.0.0.1:8080
+Status: Invalid Parameter
+[2023-06-18 20:14:26.325] [info] --------------------
+[2023-06-18 20:14:26.325] [info] Shutting down...
+[2023-06-18 20:14:31.343] [info] Initializing client...
+[2023-06-18 20:14:31.351] [info] Successfully bound message socket to 127.0.0.1:44857.
+[2023-06-18 20:14:31.351] [info] Successfully started client.
+[2023-06-18 20:14:31.351] [info] --------------------
+[2023-06-18 20:14:31.352] [info] Listing topics...
+[2023-06-18 20:14:31.357] [info] Received response from: 127.0.0.1:8080
+Status: Success
+Topics: ErstesTopic
+[2023-06-18 20:14:31.357] [info] --------------------
+[2023-06-18 20:14:31.357] [info] Shutting down...
+[2023-06-18 20:14:36.365] [info] Initializing client...
+[2023-06-18 20:14:36.366] [info] Successfully bound message socket to 127.0.0.1:39044.
+[2023-06-18 20:14:36.366] [info] Successfully started client.
+[2023-06-18 20:14:36.366] [info] --------------------
+[2023-06-18 20:14:36.366] [info] Getting status of topic: ErstesTopic
+[2023-06-18 20:14:36.366] [info] Received response from: 127.0.0.1:8080
+Status: Success
+Message-Timestamp: 18.06.2023 20:14::21
+Subscribers: 127.0.0.1:58424, 127.0.0.1:34580, 127.0.0.1:48968
+[2023-06-18 20:14:36.371] [info] --------------------
+[2023-06-18 20:14:36.371] [info] Shutting down...
+[2023-06-18 20:14:41.381] [info] Initializing client...
+[2023-06-18 20:14:41.390] [info] Successfully bound message socket to 127.0.0.1:35509.
+[2023-06-18 20:14:41.391] [info] Successfully started client.
+[2023-06-18 20:14:41.391] [info] --------------------
+[2023-06-18 20:14:41.391] [info] Getting status of topic: NichtExistierendesTopic
+[2023-06-18 20:14:41.401] [error] Received response from: 127.0.0.1:8080
+Status: Invalid Parameter
+[2023-06-18 20:14:41.402] [info] --------------------
+[2023-06-18 20:14:41.402] [info] Shutting down...

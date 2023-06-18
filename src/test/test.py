@@ -2,35 +2,43 @@ import time
 import subprocess
 
 server_path = "../../server.exe"
-server_process = subprocess.Popen([server_path])
+server_process = subprocess.Popen([server_path, "--port", "8080"])
 
 # Some Delay
-time.sleep(2)
+time.sleep(5)
 
-output_file = open("output.txt", "w")
+#Output Files
+subscribe_client_with_two_topics = open("subscribe_client_with_two_topics.txt", "w")
+subscribe_client_with_one_topic = open("subscribe_client_with_one_topic.txt", "w")
+execute_commands_client_output_file = open("execute_commands_client_output_file.txt", "w")
 
-# Commands 
-# SUBSCRIBE | topicName, clientPort
-# PUBLISH | topicName, message
-# LIST_TOPICS | 
-# GET_TOPIC_STATUS | topicName
+#Client Path
+client_path = "../../client.exe"
+
+subscribe_client_process_with_two_topics = subprocess.Popen([client_path, "--subscribe", "ErstesTopic", "ErstesTopic", "--server-port", "8080"], stdin=subprocess.PIPE, stdout=subscribe_client_with_two_topics, stderr=subprocess.STDOUT)
+subscribe_client_process_with_one_topic = subprocess.Popen([client_path, "--subscribe", "ErstesTopic", "--server-port", "8080"], stdin=subprocess.PIPE, stdout=subscribe_client_with_one_topic, stderr=subprocess.STDOUT)
+
+time.sleep(5)
+# Commands to Test
 client_commands = [
-    ["../../client.exe", "--subscribe", "ErstesTopic", "--port", "0"],
-    ["../../client.exe", "--publish", "ErstesTopic", "Message"],
-    ["../../client.exe", "--list-topics"],
-    ["../../client.exe", "--get-topic-status", "ErstesTopic"]
+    ["../../client.exe", "--publish", "ErstesTopic", "Message", "--server-port", "8080"],
+    ["../../client.exe", "--publish", "NichtExistierendesTopic", "Message", "--server-port", "8080"],
+    ["../../client.exe", "--list-topics", "--server-port", "8080"],
+    ["../../client.exe", "--get-topic-status", "ErstesTopic", "--server-port", "8080"],
+    ["../../client.exe", "--get-topic-status", "NichtExistierendesTopic", "--server-port", "8080"]
 ]
 
 for command in client_commands:
     # Start client and redirect input/output to the log file
-    client_process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=output_file, stderr=subprocess.STDOUT, universal_newlines=True)
-
+    client_process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=execute_commands_client_output_file, stderr=subprocess.STDOUT)
     # Execute command in client
     client_process.communicate()
     client_process.wait()
 
     # Some Delay
-    time.sleep(2)
+    time.sleep(5)
 
-server_process.terminate()
-output_file.close()
+#Closing Output Files
+execute_commands_client_output_file.close()
+subscribe_client_with_two_topics.close()
+subscribe_client_with_one_topic.close()
