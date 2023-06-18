@@ -46,7 +46,7 @@ von Johannes Brandenburger, Lukas Braun, Phillip Patzelt, Henry Schuler und Lea 
         subscribe_client_process_with_two_topics = subprocess.Popen([client_path, "--subscribe", "FirstTopic", "SecondTopic", "--server-port", "8080"], stdin=subprocess.PIPE, stdout=subscribe_client_with_two_topics, stderr=subprocess.STDOUT)
         ```	
         When subscribing to the topic for the first time, the file should return **Status: Success** as the first status code. The second attempt should return **Status: Failed** as the status code.
-    - The file **execute_commands_client_output_file.txt** contains the outputs of multiple commands executed on the client. This tests the **publishing** on both existing and non-existing topics. If a topic has multiple subscribers, all of them will be notified almost simultaneously when a publish action occurs. The following status codes should be returned:
+    - The file **execute_commands_client_output_file.txt** contains the outputs of multiple commands executed on the client. This tests the **publishing** on both existing and non-existing topics. If a topic has multiple subscribers, all of them will be notified almost simultaneously when a publish action occurs (e.g.: [file1](./src/test/subscribe_client_with_one_topic.txt) line 11, [file2](./src/test/subscribe_client_with_two_topics.txt) line 16). The following status codes should be returned:
         - **Status: Success** (when publishing to the topic for the first time)
         - **Status: Failed** (when publishing to the topic for the second time)
     - Additionally, the execution of the **list-topics** command is tested. 
