@@ -28,7 +28,6 @@ class ClientConnection
          */
         ~ClientConnection();
 
-
         /**
          * @brief Sends a message to the client using the websocket
          * 
@@ -57,7 +56,6 @@ class ClientConnection
     private:
         string address;
         int port;
-        // int socket;
 };
 
 #endif

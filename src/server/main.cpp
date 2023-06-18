@@ -1,3 +1,4 @@
+#include <spdlog/spdlog.h>
 #include <iostream>
 
 #include "server.h"
@@ -80,8 +81,9 @@ int main(int argc, char* argv[]) {
                     return 1;
                 }
                 i++;
-            }
-            else {
+            } else if (arg == "--debug") {
+                spdlog::set_level(spdlog::level::debug);
+            } else {
                 // Invalid argument
                 cerr << "Invalid arguments: " << endl;
                 // Print usage information

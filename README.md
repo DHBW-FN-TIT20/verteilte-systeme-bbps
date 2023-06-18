@@ -1,7 +1,44 @@
-# verteilte-systeme-bbpss
-Abschlusstestat für die Vorlesung Verteilte Systeme von Brandenburger, Braun, Patzelt, Schuler und Silberzahn
+# Publisher / Subscriber System
+Abschlusstestat für die Vorlesung Verteilte Systeme and der DHBW Ravensburg im Studiengang Informatik - Informationstechnik des Jahrgangs 2020. <br>
+von Johannes Brandenburger, Lukas Braun, Phillip Patzelt, Henry Schuler und Lea Silberzahn
 
+# Table of Contents
+- [Scope of Tasks](#Scope-of-Tasks)
+- [Technologies](#Instructions)
+
+
+# Scope of Tasks
+<!-- können wir auch Brief overview oder Desription nennen -->
+# Installation
 # Instructions
+
+# Technologies
+- C++
+    - JsonCpp
+    - spdlog
+- Python (User Tests)
+
+
+
+# Description of System Architecture
+- Description
+- Reason
+# Interface Description
+- Protokolls, allowed parameter(area, type), Pre- and Post-Conditions, wrongdoing
+- TCP for the client prompts to the server
+- UDP for the Server publish
+# Concurrency
+- Multithreading with Mutex
+
+# Source Code Dokumentation
+
+# Testing
+
+
+
+
+
+# OLD
 
 ## Start the Server
 A server is started with the following arguments:
@@ -32,6 +69,7 @@ COMMAND | --subscribe &lt;TOPIC1&gt; &lt;...&gt; &lt;TOPICn&gt; | subscribe to (
 COMMAND | --publish &lt;TOPIC&gt; &lt;MESSAGE&gt; | publish a message to a topic
 COMMAND | --list-topics | list all existing topics
 COMMAND | --get-topic-status &lt;TOPIC1&gt; &lt;...&gt; &lt;TOPICn&gt; | get the status of (multiple) topics
+DEBUG | --debug | enable logging debug information
 
 
 # JSON communication
