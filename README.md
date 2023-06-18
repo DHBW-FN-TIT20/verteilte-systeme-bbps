@@ -39,11 +39,23 @@ von Johannes Brandenburger, Lukas Braun, Phillip Patzelt, Henry Schuler und Lea 
         ```
         subscribe_client_process_with_one_topic = subprocess.Popen([client_path, "--subscribe", "FirstTopic", "--server-port", "8080"], stdin=subprocess.PIPE, stdout=subscribe_client_with_one_topic, stderr=subprocess.STDOUT)
         ```	
+      To verify that the command was executed successfully, the file should contain the following output:
+      - **Status: Success**
     - The file **subscribe_client_with_multiple_topics.txt** contains the outputs of the client when it subscribes to multiple topics. In this case, an attempt is made to subscribe to the same topic multiple times. The first subscription attempt should be successful, while the subsequent attempts should fail. Additionally, the heartbeat of the client can also be observed in this file. The subscription is performed using the following lines of code:
         ```
         subscribe_client_process_with_two_topics = subprocess.Popen([client_path, "--subscribe", "FirstTopic", "SecondTopic", "--server-port", "8080"], stdin=subprocess.PIPE, stdout=subscribe_client_with_two_topics, stderr=subprocess.STDOUT)
         ```	
-    - The file **execute_commands_client_output_file.txt** contains the outputs of multiple commands executed on the client. This tests the **publishing** on both existing and non-existing topics. Additionally, the execution of the **list-topics** command is tested. Finally, the **get-topic-status** command is tested, which retrieves the status of existing and non-existing topics. The commands are executed using the following lines of code:
+        When subscribing to the topic for the first time, the file should return **Status: Success** as the first status code. The second attempt should return **Status: Failed** as the status code.
+    - The file **execute_commands_client_output_file.txt** contains the outputs of multiple commands executed on the client. This tests the **publishing** on both existing and non-existing topics. If a topic has multiple subscribers, all of them will be notified almost simultaneously when a publish action occurs. The following status codes should be returned:
+        - **Status: Success** (when publishing to the topic for the first time)
+        - **Status: Failed** (when publishing to the topic for the second time)
+    - Additionally, the execution of the **list-topics** command is tested. 
+    In this case, the following information should be returned:
+      - **Status: Success** and **Topics: ErstesTopic** (when publishing to the topic for the first time)
+    - Finally, the **get-topic-status** command is tested, which retrieves the status of existing and non-existing topics. The following information should be returned:
+      - **Status: Success**, **Message-Timestamp:** und **Subscriber:** (when publishing to the topic for the first time)
+      - **Status: Invalid Paramerter** (when using get-topic-status on a non-existing topic)
+    The commands are executed using the following lines of code:
         ```
         # Commands to Test
         client_commands = [
