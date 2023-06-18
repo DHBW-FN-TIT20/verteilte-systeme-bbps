@@ -15,6 +15,9 @@
 
 using namespace std;
 
+/**
+ * @brief Main Class for the Client.
+ */
 class Client {
     public:
         /**

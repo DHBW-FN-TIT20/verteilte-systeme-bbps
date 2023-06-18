@@ -14,6 +14,7 @@ von Johannes Brandenburger, Lukas Braun, Phillip Patzelt, Henry Schuler und Lea 
   - [Client and Server (C++)](#client-and-server-c)
     - [JsonCpp](#jsoncpp)
     - [spdlog](#spdlog)
+    - [doxygen](#doxygen)
   - [User Tests (Python)](#user-tests-python)
 - [Description of System Architecture TODO:](#description-of-system-architecture-todo)
 - [Interface Description](#interface-description)
@@ -76,7 +77,7 @@ COMMAND | --list-topics | list all existing topics
 COMMAND | --get-topic-status &lt;TOPIC1&gt; &lt;...&gt; &lt;TOPICn&gt; | get the status of (multiple) topics
 DEBUG | --debug | enable logging debug information
 
-> **Restriction**: When using the `--publish` command, the topic name and message combined cannot exceed 1700 characters.
+> **Restriction**: When using the `--publish` command, the topic name and message combined cannot exceed 1700 characters. However, all types of characters are allowed.
 
 ## Server
 A server is started with the following arguments:
@@ -99,6 +100,9 @@ This library is used to parse the request and response bodies for the communicat
 [Spdlog](https://github.com/gabime/spdlog) is a lightweight logging library for C++.
 This library is used to log all user information and errors to the console.
 Furthermore, with the help of the `--debug` argument, debug information can be displayed.
+
+### doxygen
+[doxygen](https://www.doxygen.nl) is used to create a HTML documentation based on the docstrings in the source code.
 
 ## User Tests (Python)
 
@@ -179,5 +183,6 @@ Thus, the program will not crash, but the error will be logged using the "error"
 
 ## Doxygen
 
+As mentioned before we used doxygen to generate a source code documentation. It can be found in the doc folder and can be opened [here](./doc/html/index.html).
 
 # Testing

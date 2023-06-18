@@ -6,6 +6,9 @@
 
 using namespace std;
 
+/**
+ * @brief Class for the ClientConnection.
+ */
 class ClientConnection
 {
     public:

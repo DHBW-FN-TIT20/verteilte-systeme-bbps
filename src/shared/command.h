@@ -11,7 +11,6 @@ using namespace std;
 
 /**
  * @brief Defines a class that represents a command that can be sent from the client to the server.
- * 
  */
 class Command {
     public:

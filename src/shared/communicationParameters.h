@@ -21,7 +21,6 @@ enum CommunicationParameters {
 
 /**
  * @brief Maps a CommunicationParameters Enum to a string.
- * 
  */
 static map<CommunicationParameters, string> communicationParameterToStringDictionary = {
     {CommunicationParameters::topicName, "topicName"},

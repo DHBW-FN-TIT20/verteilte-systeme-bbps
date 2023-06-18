@@ -9,6 +9,9 @@
 
 using namespace std;
 
+/**
+ * @brief Class for the Topic.
+ */
 class Topic {
     public:
         /**

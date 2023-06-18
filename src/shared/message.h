@@ -7,7 +7,6 @@ using namespace std;
 
 /**
  * @brief Defines a class that represents a message that can be sent from the server to the client.
- * 
  */
 class Message {
     public:

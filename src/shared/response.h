@@ -12,7 +12,6 @@ using namespace std;
 
 /**
  * @brief Defines a class that represents a server response to a client command.
- * 
  */
 class Response {
     public:

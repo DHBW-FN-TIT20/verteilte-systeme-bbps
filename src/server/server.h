@@ -13,7 +13,7 @@
 using namespace std;
 
 /**
- * @brief Publisher
+ * @brief Main Class for the Server.
  */
 class Server {
     public:
